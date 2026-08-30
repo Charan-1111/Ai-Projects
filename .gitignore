@@ -1,0 +1,52 @@
+# Go build artifacts
+/bin/
+/pkg/
+/*.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go test binaries
+*.test
+
+# Go coverage output
+*.out
+coverage.txt
+
+# Go workspace / modules cache
+go.work
+.go/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Local config overrides
+config/local/*.json
+!config/local/config.json
+
+# Build output directories
+build/
+dist/
+out/
+
+# Binaries produced by the app
+LLM-Playground/bin/
+LLM-Playground/dist/
