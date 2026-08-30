@@ -11,19 +11,19 @@ func (h *Handlers) GenerateResponse(c fiber.Ctx) error {
 	var request models.PromptRequest
 
 	if err := c.Bind().Body(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "Invalid Request Body"})
+		return sendError(c, fiber.StatusBadRequest, "Invalid Request Body")
 	}
 
 	if err := validation.ValidatePromptRequest(&request, h.config); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": err.Error()})
+		return sendError(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	requestId := c.Locals("requestId").(string)
 
 	modelResponse, err := h.Services.ResponseGeneration(c.Context(), requestId, &request)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": "Failed to generate the response : " + err.Error()})
+		return sendError(c, fiber.StatusInternalServerError, "Failed to generate the response: "+err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Response generated successfully", "response": modelResponse})
+	return sendSuccess(c, fiber.StatusOK, "Response generated successfully", fiber.Map{"response": modelResponse})
 }
