@@ -15,11 +15,12 @@ func (app *Application) SetupRoutes() *fiber.App {
 	appServer.Use(middleware.RequestId)
 
 	handler := handlers.NewHandler(app.config)
-	handler.Services = services.NewService(app.config)
+	handler.Services = services.NewService(app.config, app.client)
 
 	appServer.Get("/health", handler.HealthCheck)
 
 	apiGroup := appServer.Group("/v1/llm")
 	apiGroup.Get("/models/available", handler.AvailableModels)
+	apiGroup.Post("/generate", handler.GenerateResponse)
 	return appServer
 }
