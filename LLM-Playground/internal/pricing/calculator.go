@@ -2,20 +2,15 @@ package pricing
 
 import (
 	"llm-playground/internal/models"
-
-	"google.golang.org/genai"
+	"llm-playground/internal/provider"
 )
 
-func PriceCalculator(model models.ModelConfig, response *genai.GenerateContentResponse) (models.Usage, float64) {
+func PriceCalculator(model models.ModelConfig, response *provider.GenerateResponse) (models.Usage, float64) {
 	usage := models.Usage{}
-
-	if response == nil || response.UsageMetadata == nil {
-		return usage, 0
-	}
-
-	usage.InputTokens = int64(response.UsageMetadata.PromptTokenCount)
-	usage.OutputTokens = int64(response.UsageMetadata.CandidatesTokenCount)
-	usage.TotalTokens = int64(response.UsageMetadata.TotalTokenCount)
+	
+	usage.InputTokens = int64(response.InputTokens)
+	usage.OutputTokens = int64(response.OutputTokens)
+	usage.TotalTokens = int64(response.TotalTokens)
 
 	const tokensPerMillion = 1_000_000.0
 
