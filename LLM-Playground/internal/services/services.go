@@ -2,18 +2,17 @@ package services
 
 import (
 	"llm-playground/internal/config"
-
-	"google.golang.org/genai"
+	"llm-playground/internal/provider"
 )
 
 type Services struct {
-	config *config.Configuration
-	client *genai.Client
+	config   *config.Configuration
+	provider provider.LLMProvider
 }
 
-func NewService(config *config.Configuration, client *genai.Client) *Services {
+func NewService(config *config.Configuration, provider provider.LLMProvider) *Services {
 	return &Services{
-		config: config,
-		client: client,
+		config:   config,
+		provider: provider,
 	}
 }

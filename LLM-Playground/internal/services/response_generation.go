@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"llm-playground/internal/models"
 	"llm-playground/internal/pricing"
+	"llm-playground/internal/provider"
 	"time"
-
-	"google.golang.org/genai"
 )
 
 func (s *Services) ResponseGeneration(ctx context.Context, requestId string, request *models.PromptRequest) (models.ModelResponse, error) {
@@ -20,32 +19,13 @@ func (s *Services) ResponseGeneration(ctx context.Context, requestId string, req
 		return models.ModelResponse{}, fmt.Errorf("model configuration not found for request model %q and model_id %q", request.Model, request.ModelId)
 	}
 
-	ctx, cancel := context.WithTimeout(
-		ctx,
-		30*time.Second,
-	)
-	defer cancel()
-
-	config := &genai.GenerateContentConfig{
-		Temperature: genai.Ptr(float32(request.Temperature)),
-	}
-
-	if request.MaxOutputTokens > 0 {
-		config.MaxOutputTokens = int32(request.MaxOutputTokens)
-	}
+	input, _ := provider.BuildGenerateInput(modelConfig, request)
 
 	start := time.Now()
-	response, err := s.client.Models.GenerateContent(
-		ctx,
-		modelConfig.ProviderModel,
-		genai.Text(request.Prompt),
-		config,
-	)
-
+	response, err := s.provider.Generate(ctx, input)
 	if err != nil {
-		return models.ModelResponse{}, fmt.Errorf("Failed to generate response : %w", err)
+		return models.ModelResponse{}, err
 	}
-
 	latencyMs := time.Since(start).Milliseconds()
 
 	usage, totalCost := pricing.PriceCalculator(modelConfig, response)
@@ -53,7 +33,7 @@ func (s *Services) ResponseGeneration(ctx context.Context, requestId string, req
 	modelResponse := models.ModelResponse{
 		RequestId:         requestId,
 		Model:             modelConfig.ProviderModel,
-		Response:          response.Text(),
+		Response:          response.Text,
 		Usage:             usage,
 		EstimatedCostUsed: totalCost,
 		FinishReason:      "stop",

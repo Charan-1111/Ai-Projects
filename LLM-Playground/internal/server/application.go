@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 	"llm-playground/internal/config"
+	"llm-playground/internal/provider"
 	"os"
 
 	"google.golang.org/genai"
 )
 
 type Application struct {
-	config *config.Configuration
-	client *genai.Client
+	config   *config.Configuration
+	client   *genai.Client
+	provider provider.LLMProvider
 }
 
 func NewApplication() (*Application, error) {
@@ -38,9 +40,12 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("Error initializing genai client : %w", err)
 	}
 
+	llmProvider := provider.GeminiProvider{Client: client}
+
 	return &Application{
-		config: config,
-		client: client,
+		config:   config,
+		client:   client,
+		provider: &llmProvider,
 	}, nil
 }
 
