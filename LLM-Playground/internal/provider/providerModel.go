@@ -19,10 +19,10 @@ type GenerateResponse struct {
 }
 
 type StreamChunk struct {
-	Delta           string
-	InputTokens     int64
-	OutputTokens    int64
-	FinishedReasong string
+	Delta        string
+	InputTokens  int64
+	OutputTokens int64
+	FinishReason string
 }
 
 type GeneratorService struct {

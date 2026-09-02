@@ -36,7 +36,7 @@ func (s *Services) ResponseGeneration(ctx context.Context, requestId string, req
 		Response:          response.Text,
 		Usage:             usage,
 		EstimatedCostUsed: totalCost,
-		FinishReason:      "stop",
+		FinishReason:      response.FinishReason,
 		LatencyMs:         latencyMs,
 	}
 
