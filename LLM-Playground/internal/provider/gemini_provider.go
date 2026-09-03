@@ -12,7 +12,7 @@ type GeminiProvider struct {
 	Client *genai.Client
 }
 
-func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*GenerateResponse, error) {
+func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*GenerateResponse, int, error) {
 	ctx, cancel := context.WithTimeout(
 		ctx,
 		30*time.Second,
@@ -35,11 +35,11 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	)
 
 	if err != nil {
-		return &GenerateResponse{}, fmt.Errorf("Failed to generate response : %w", err)
+		return &GenerateResponse{}, 500, fmt.Errorf("Failed to generate response : %w", err)
 	}
 
 	if response == nil || response.UsageMetadata == nil {
-		return &GenerateResponse{}, fmt.Errorf("Response generation error")
+		return &GenerateResponse{}, 500, fmt.Errorf("Response generation error")
 	}
 
 	providerResponse := GenerateResponse{}
@@ -48,7 +48,7 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	providerResponse.OutputTokens = int64(response.UsageMetadata.CandidatesTokenCount)
 	providerResponse.TotalTokens = int64(response.UsageMetadata.TotalTokenCount)
 	providerResponse.FinishReason = string(response.Candidates[0].FinishReason)
-	return &providerResponse, nil
+	return &providerResponse, 200, nil
 }
 
 func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput) (<-chan StreamChunk, <-chan error) {
@@ -74,7 +74,10 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 		defer close(errs)
 		defer func() {
 			if r := recover(); r != nil {
-				errs <- fmt.Errorf("gemini stream: recovered from panic: %v", r)
+				errs <- &StreamError{
+					StatusCode: 500,
+					Err:        fmt.Errorf("gemini stream: recovered from panic: %v", r),
+				}
 			}
 		}()
 
@@ -87,7 +90,10 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 
 		for chunk, err := range streamChunks {
 			if err != nil {
-				errs <- fmt.Errorf("gemini stream error: %w", err)
+				errs <- &StreamError{
+					StatusCode: 500,
+					Err:        fmt.Errorf("gemini stream error: %w", err),
+				}
 				return
 			}
 
