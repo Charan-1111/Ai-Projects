@@ -12,6 +12,7 @@ type Configuration struct {
 	Env             string                        `json:"env"`
 	AvailableModels map[string]models.ModelConfig `json:"available_models"`
 	DefaultModel    string                        `json:"default_model"`
+	Retries         models.Retries                `json:"retries"`
 	once            sync.Once
 }
 
