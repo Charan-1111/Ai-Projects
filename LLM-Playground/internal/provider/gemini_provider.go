@@ -35,11 +35,13 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	)
 
 	if err != nil {
-		return &GenerateResponse{}, 500, fmt.Errorf("Failed to generate response : %w", err)
+		classifiedErr := ClassifyError("gemini", fmt.Errorf("failed to generate response: %w", err))
+		return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
 	}
 
 	if response == nil || response.UsageMetadata == nil {
-		return &GenerateResponse{}, 500, fmt.Errorf("Response generation error")
+		classifiedErr := ClassifyError("gemini", fmt.Errorf("response generation error"))
+		return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
 	}
 
 	providerResponse := GenerateResponse{}
@@ -74,10 +76,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 		defer close(errs)
 		defer func() {
 			if r := recover(); r != nil {
-				errs <- &StreamError{
-					StatusCode: 500,
-					Err:        fmt.Errorf("gemini stream: recovered from panic: %v", r),
-				}
+				errs <- ClassifyError("gemini", fmt.Errorf("gemini stream: recovered from panic: %v", r))
 			}
 		}()
 
@@ -90,10 +89,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 
 		for chunk, err := range streamChunks {
 			if err != nil {
-				errs <- &StreamError{
-					StatusCode: 500,
-					Err:        fmt.Errorf("gemini stream error: %w", err),
-				}
+				errs <- ClassifyError("gemini", fmt.Errorf("gemini stream error: %w", err))
 				return
 			}
 

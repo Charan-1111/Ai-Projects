@@ -53,7 +53,8 @@ func (h *Handlers) GenerateStreamResponse(c fiber.Ctx, stream *sse.Stream) error
 				continue
 			}
 
-			return stream.Event(sse.Event{Name: "error", Data: fiber.Map{"code": 1, "message": streamErr.Error()}})
+			statusCode := providerErrorStatus(streamErr)
+			return stream.Event(sse.Event{Name: "error", Data: fiber.Map{"code": statusCode, "message": streamErr.Error()}})
 		}
 	}
 
