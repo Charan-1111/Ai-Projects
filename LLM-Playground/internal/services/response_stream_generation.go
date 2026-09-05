@@ -81,8 +81,8 @@ func (s *Services) ResponseStreamGeneration(ctx context.Context, request *models
 }
 
 func streamErrorRetryable(err error) bool {
-	var streamErr *provider.StreamError
-	return errors.As(err, &streamErr) && utils.IsRetryableError(streamErr.StatusCode)
+	var providerErr *provider.Error
+	return errors.As(err, &providerErr) && utils.IsRetryableError(providerErr.StatusCode)
 }
 
 func waitForStreamRetry(ctx context.Context, delay time.Duration) bool {

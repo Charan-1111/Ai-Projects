@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"llm-playground/internal/models"
+	"llm-playground/internal/provider"
 	"llm-playground/internal/validation"
 
 	"github.com/gofiber/fiber/v3"
@@ -22,8 +24,16 @@ func (h *Handlers) GenerateResponse(c fiber.Ctx) error {
 
 	modelResponse, err := h.Services.ResponseGeneration(c.Context(), requestId, &request)
 	if err != nil {
-		return sendError(c, fiber.StatusInternalServerError, "Failed to generate the response: "+err.Error())
+		return sendError(c, providerErrorStatus(err), "Failed to generate the response: "+err.Error())
 	}
 
 	return sendSuccess(c, fiber.StatusOK, "Response generated successfully", fiber.Map{"response": modelResponse})
+}
+
+func providerErrorStatus(err error) int {
+	var providerErr *provider.Error
+	if errors.As(err, &providerErr) && providerErr.StatusCode >= 400 && providerErr.StatusCode < 600 {
+		return providerErr.StatusCode
+	}
+	return fiber.StatusInternalServerError
 }
