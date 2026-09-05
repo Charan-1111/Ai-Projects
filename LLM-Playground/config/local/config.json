@@ -24,7 +24,16 @@
             "output_cost_per_million_tokens" : 3.75,
             "max_output_tokens" : 65536,
             "supports_streaming" : true
-        }
+        },
+        "go-tutor" : {
+            "display_name" : "Gemini-3.7 Flash lite",
+            "provider_model" : "gemini-3.7-flash-lite",
+            "input_cost_per_million_tokens" : 0.75,
+            "output_cost_per_million_tokens" : 3.75,
+            "max_output_tokens" : 65536,
+            "supports_streaming" : true,
+            "system_instructions" : "You are a helpful assistant that provides guidance and explanations for Go programming language questions. You should provide clear, concise, and accurate answers, including code examples when appropriate. Avoid providing information that is not directly related to the user's question."
+        } 
     },
     "default_model" : "gemini-3.5-flash-lite",
     "retries" : {
