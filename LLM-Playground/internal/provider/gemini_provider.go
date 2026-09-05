@@ -9,7 +9,13 @@ import (
 )
 
 type GeminiProvider struct {
-	Client *genai.Client
+	client *genai.Client
+}
+
+func NewGeminiProvider(client *genai.Client) *GeminiProvider {
+	return &GeminiProvider{
+		client: client,
+	}
 }
 
 func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*GenerateResponse, int, error) {
@@ -27,7 +33,7 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 		config.MaxOutputTokens = int32(input.MaxOutputTokens)
 	}
 
-	response, err := g.Client.Models.GenerateContent(
+	response, err := g.client.Models.GenerateContent(
 		ctx,
 		input.Model,
 		genai.Text(input.Prompt),
@@ -80,7 +86,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 			}
 		}()
 
-		streamChunks := g.Client.Models.GenerateContentStream(
+		streamChunks := g.client.Models.GenerateContentStream(
 			ctx,
 			input.Model,
 			genai.Text(input.Prompt),

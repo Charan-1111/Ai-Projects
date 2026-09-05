@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"llm-playground/internal/chat"
 	"llm-playground/internal/config"
 	"llm-playground/internal/provider"
 	"os"
@@ -11,9 +12,10 @@ import (
 )
 
 type Application struct {
-	config   *config.Configuration
-	client   *genai.Client
-	provider provider.LLMProvider
+	config              *config.Configuration
+	client              *genai.Client
+	provider            provider.LLMProvider
+	inMemoryChatService *chat.InMemoryChatService
 }
 
 func NewApplication() (*Application, error) {
@@ -40,12 +42,17 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("Error initializing genai client : %w", err)
 	}
 
-	llmProvider := provider.GeminiProvider{Client: client}
+	// llmProvider := provider.GeminiProvider{Client: client}
+	llmProvider := provider.NewGeminiProvider(client)
+
+	// creating the inmeory chat se4rvice
+	chatService := chat.NewInMemoryChatService(llmProvider)
 
 	return &Application{
-		config:   config,
-		client:   client,
-		provider: &llmProvider,
+		config:              config,
+		client:              client,
+		provider:            llmProvider,
+		inMemoryChatService: chatService,
 	}, nil
 }
 
