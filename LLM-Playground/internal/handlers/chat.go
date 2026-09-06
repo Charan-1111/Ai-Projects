@@ -20,7 +20,10 @@ func (h *Handlers) Chat(c fiber.Ctx) error {
 	requestId := c.Locals("requestId").(string)
 	sessionId := c.Locals("sessionId").(string)
 
+	response, err := h.Services.Chat(c.Context(), requestId, sessionId, &request)
+	if err != nil {
+		return sendError(c, fiber.StatusInternalServerError, err.Error())
+	}
 
-	
-	return nil
+	return c.JSON(response)
 }

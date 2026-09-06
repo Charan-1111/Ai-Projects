@@ -33,5 +33,6 @@ func (app *Application) SetupRoutes() *fiber.App {
 	apiGroup.Get("/models/available", handler.AvailableModels)
 	apiGroup.Post("/generate", handler.GenerateResponse)
 	apiGroup.Post("/generate/stream", sse.New(sse.Config{Handler: handler.GenerateStreamResponse}))
+	apiGroup.Post("/chat", handler.Chat)
 	return appServer
 }

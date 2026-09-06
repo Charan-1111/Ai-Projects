@@ -28,6 +28,7 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	config := &genai.GenerateContentConfig{
 		Temperature: genai.Ptr(float32(input.Temperature)),
 	}
+	contents := geminiContents(input)
 
 	if input.MaxOutputTokens > 0 {
 		config.MaxOutputTokens = int32(input.MaxOutputTokens)
@@ -36,7 +37,7 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	response, err := g.client.Models.GenerateContent(
 		ctx,
 		input.Model,
-		genai.Text(input.Prompt),
+		contents,
 		config,
 	)
 
@@ -71,6 +72,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 	config := &genai.GenerateContentConfig{
 		Temperature: genai.Ptr(float32(input.Temperature)),
 	}
+	contents := geminiContents(input)
 
 	if input.MaxOutputTokens > 0 {
 		config.MaxOutputTokens = int32(input.MaxOutputTokens)
@@ -89,7 +91,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 		streamChunks := g.client.Models.GenerateContentStream(
 			ctx,
 			input.Model,
-			genai.Text(input.Prompt),
+			contents,
 			config,
 		)
 
@@ -121,4 +123,24 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 	}()
 
 	return chunks, errs
+}
+
+func geminiContents(input GenerateInput) []*genai.Content {
+	contents := make([]*genai.Content, 0, len(input.History)+1)
+	for _, message := range input.History {
+		role := message.Role
+		if role == "assistant" {
+			role = "model"
+		}
+		contents = append(contents, &genai.Content{
+			Role:  role,
+			Parts: []*genai.Part{{Text: message.Content}},
+		})
+	}
+
+	if input.Prompt != "" {
+		contents = append(contents, genai.Text(input.Prompt)...)
+	}
+
+	return contents
 }
