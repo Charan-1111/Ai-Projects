@@ -5,9 +5,15 @@ import "llm-playground/internal/models"
 type GenerateInput struct {
 	SystemPrompt    string
 	Prompt          string
+	History         []Message
 	Model           string
 	Temperature     float64
 	MaxOutputTokens int64
+}
+
+type Message struct {
+	Role    string
+	Content string
 }
 
 type GenerateResponse struct {
