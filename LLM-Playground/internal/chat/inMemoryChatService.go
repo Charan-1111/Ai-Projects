@@ -24,6 +24,11 @@ func (ics *InMemoryChatService) Chat(ctx context.Context, requestId, conversatio
 	defer ics.mu.Unlock()
 
 	history := append([]provider.Message(nil), ics.messages[conversationId]...)
+
+	if len(history) == 0 {
+		// including a system prompt as the first message in the conversation history
+		history = append(history, provider.Message{Role: "system", Content: "You are a helpful assistant."})
+	}
 	request.History = history
 	response, _, err := ics.llm.Generate(ctx, request)
 	if err != nil {
