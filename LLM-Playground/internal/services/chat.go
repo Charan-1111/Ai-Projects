@@ -15,5 +15,6 @@ func (s *Services) Chat(ctx context.Context, requestId, conversationId string, r
 
 	input, _ := provider.BuildGenerateInput(modelConfig, request)
 
-	return s.inMemoryChatService.Chat(ctx, requestId, conversationId, input)
+	// return s.inMemoryChatService.Chat(ctx, requestId, conversationId, input)
+	return s.persistentChatService.Chat(ctx, requestId, conversationId, input)
 }

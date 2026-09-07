@@ -14,12 +14,13 @@ import (
 )
 
 type Application struct {
-	log                 *logging.Log
-	config              *config.Configuration
-	client              *genai.Client
-	provider            provider.LLMProvider
-	inMemoryChatService *chat.InMemoryChatService
-	dbStore             database.Repository
+	log                   *logging.Log
+	config                *config.Configuration
+	client                *genai.Client
+	provider              provider.LLMProvider
+	inMemoryChatService   *chat.InMemoryChatService
+	persistentChatService *chat.PersistentChatService
+	dbStore               database.Repository
 }
 
 func NewApplication() (*Application, error) {
@@ -31,6 +32,12 @@ func NewApplication() (*Application, error) {
 	err := config.LoadConfig()
 	if err != nil {
 		return nil, err
+	}
+
+	databaseStore := &database.DataBaseStore{}
+	err = databaseStore.InitializeDatabaseStore(context.Background(), config.Queries, log)
+	if err != nil {
+		return nil, fmt.Errorf("Error initializing database store : %w", err)
 	}
 
 	apiKey := os.Getenv("LLM_PROVIDER_API_KEY")
@@ -55,19 +62,17 @@ func NewApplication() (*Application, error) {
 	// creating the inmeory chat se4rvice
 	chatService := chat.NewInMemoryChatService(llmProvider)
 
-	databaseStore := &database.DataBaseStore{}
-	err = databaseStore.InitializeDatabaseStore(context.Background(), config.Queries, log)
-	if err != nil {
-		return nil, fmt.Errorf("Error initializing database store : %w", err)
-	}
+	// creating the persistent chat service
+	persistentChatService := chat.NewPersistentChatService(llmProvider, databaseStore)
 
 	return &Application{
-		log:                 log,
-		config:              config,
-		client:              client,
-		provider:            llmProvider,
-		inMemoryChatService: chatService,
-		dbStore:             databaseStore,
+		log:                   log,
+		config:                config,
+		client:                client,
+		provider:              llmProvider,
+		inMemoryChatService:   chatService,
+		persistentChatService: persistentChatService,
+		dbStore:               databaseStore,
 	}, nil
 }
 

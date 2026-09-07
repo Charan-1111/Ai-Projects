@@ -45,6 +45,13 @@
         "create" : {
             "conversations" : "CREATE TABLE IF NOT EXISTS conversations  (id TEXT PRIMARY KEY, model TEXT, user_id TEXT NOT NULL, summary TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
             "message" : "CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, conversation_id TEXT REFERENCES conversations(id) ON DELETE CASCADE, role TEXT, content TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+        },
+        "fetch" : {
+            "messages" : "SELECT role, content FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC"
+        },
+        "save" : {
+            "conversation" : "INSERT INTO conversations (id, user_id) VALUES ($1, $1) ON CONFLICT (id) DO NOTHING",
+            "message" : "INSERT INTO messages (id, conversation_id, role, content) VALUES ($1, $2, $3, $4)"
         }
     }
 } 
