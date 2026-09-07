@@ -5,20 +5,27 @@ import (
 	"fmt"
 	"llm-playground/internal/chat"
 	"llm-playground/internal/config"
+	"llm-playground/internal/logging"
 	"llm-playground/internal/provider"
+	"llm-playground/internal/store/database"
 	"os"
 
 	"google.golang.org/genai"
 )
 
 type Application struct {
+	log                 *logging.Log
 	config              *config.Configuration
 	client              *genai.Client
 	provider            provider.LLMProvider
 	inMemoryChatService *chat.InMemoryChatService
+	dbStore             database.Repository
 }
 
 func NewApplication() (*Application, error) {
+	log := &logging.Log{}
+	log.Initialize()
+
 	config := &config.Configuration{}
 
 	err := config.LoadConfig()
@@ -48,18 +55,32 @@ func NewApplication() (*Application, error) {
 	// creating the inmeory chat se4rvice
 	chatService := chat.NewInMemoryChatService(llmProvider)
 
+	databaseStore := &database.DataBaseStore{}
+	err = databaseStore.InitializeDatabaseStore(context.Background(), config.Queries, log)
+	if err != nil {
+		return nil, fmt.Errorf("Error initializing database store : %w", err)
+	}
+
 	return &Application{
+		log:                 log,
 		config:              config,
 		client:              client,
 		provider:            llmProvider,
 		inMemoryChatService: chatService,
+		dbStore:             databaseStore,
 	}, nil
 }
 
 func (app *Application) StartServer() error {
+	// creating the tables
+	err := app.dbStore.Create(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error creating tables : %w", err)
+	}
+
 	appServer := app.SetupRoutes()
 
-	err := appServer.Listen(":8000")
+	err = appServer.Listen(":8000")
 
 	return err
 }
