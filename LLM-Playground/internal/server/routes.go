@@ -25,7 +25,7 @@ func (app *Application) SetupRoutes() *fiber.App {
 	appServer.Use(middleware.RequestId)
 	appServer.Use(middleware.SessionId)
 	handler := handlers.NewHandler(app.config)
-	handler.Services = services.NewService(app.config, app.provider, app.inMemoryChatService)
+	handler.Services = services.NewService(app.config, app.provider, app.inMemoryChatService, app.persistentChatService)
 
 	appServer.Get("/health", handler.HealthCheck)
 
