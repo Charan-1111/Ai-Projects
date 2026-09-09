@@ -12,5 +12,7 @@ func RequestID(c fiber.Ctx) error {
 	}
 
 	c.Set("X-Request-ID", requestID)
+	c.Locals("requestId", requestID)
+
 	return c.Next()
 }
