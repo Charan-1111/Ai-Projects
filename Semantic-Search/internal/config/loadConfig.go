@@ -12,7 +12,7 @@ type Configuration struct {
 	Port            string                        `json:"port"`
 	AvailableModels map[string]models.ModelConfig `json:"available_models"`
 	DefaultModel    string                        `json:"default_model"`
-	EmbeddingModels string                        `json:"embedding_models"`
+	EmbeddingModels models.Embeddings             `json:"embedding_models"`
 	Retries         models.Retries                `json:"retries"`
 	Queries         models.Queries                `json:"queries"`
 	once            sync.Once

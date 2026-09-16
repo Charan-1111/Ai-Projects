@@ -37,7 +37,10 @@
         }
     },
     "default_model": "gemini-3.5-flash-lite",
-	"embedding_models" : "text-embedding-001",
+	"embedding_models" : {
+        "text" : "gemini-embedding-001",
+        "multimodal" : "gemini-embedding-2"
+    },
     "retries": {
         "initial_delay_ms": 500,
         "maximum_delay_ms": 50000,

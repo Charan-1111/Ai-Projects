@@ -7,5 +7,10 @@ type ModelConfig struct {
 	OutputCostPerMillionTokens float64 `json:"output_cost_per_million_tokens"`
 	MaxOutputTokens            int64   `json:"max_output_tokens"`
 	SupportsStreaming          bool    `json:"supports_streaming"`
-	SystemInstructions        string  `json:"system_instructions,omitempty"`
+	SystemInstructions         string  `json:"system_instructions,omitempty"`
+}
+
+type Embeddings struct {
+	Text       string `json:"text"`
+	MultiModal string `json:"multimodal"`
 }

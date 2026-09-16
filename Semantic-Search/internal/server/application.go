@@ -7,12 +7,14 @@ import (
 	"semantic-search/internal/config"
 	"semantic-search/internal/logging"
 	"semantic-search/internal/providers"
+	"semantic-search/internal/services"
 )
 
 type Application struct {
-	log        *logging.Log
-	config     *config.Configuration
+	log         *logging.Log
+	config      *config.Configuration
 	llmProvider providers.LLMProvider
+	documents   *[]services.Document
 }
 
 func NewApplication() (*Application, error) {
@@ -30,9 +32,10 @@ func NewApplication() (*Application, error) {
 	}
 
 	return &Application{
-		log:        log,
-		config:     applicationConfig,
+		log:         log,
+		config:      applicationConfig,
 		llmProvider: geminiClient,
+		documents:   &[]services.Document{},
 	}, nil
 }
 
