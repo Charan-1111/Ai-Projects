@@ -8,6 +8,7 @@ import (
 	"semantic-search/internal/logging"
 	"semantic-search/internal/providers"
 	"semantic-search/internal/services"
+	"semantic-search/internal/store/database"
 )
 
 type Application struct {
@@ -15,6 +16,7 @@ type Application struct {
 	config      *config.Configuration
 	llmProvider providers.LLMProvider
 	documents   *[]services.Document
+	dbStore     database.Repository
 }
 
 func NewApplication() (*Application, error) {
@@ -24,6 +26,11 @@ func NewApplication() (*Application, error) {
 	applicationConfig := &config.Configuration{}
 	if err := applicationConfig.LoadConfig(); err != nil {
 		return nil, fmt.Errorf("load configuration: %w", err)
+	}
+
+	databaseStore := &database.DataBaseStore{}
+	if err := databaseStore.InitializeDatabaseStore(context.Background(), applicationConfig.Queries, log); err != nil {
+		return nil, fmt.Errorf("initialize database store: %w", err)
 	}
 
 	geminiClient, err := providers.NewGeminiProvider(context.Background())
@@ -36,9 +43,14 @@ func NewApplication() (*Application, error) {
 		config:      applicationConfig,
 		llmProvider: geminiClient,
 		documents:   &[]services.Document{},
+		dbStore:     databaseStore,
 	}, nil
 }
 
 func (app *Application) StartServer() error {
+	if err := app.dbStore.Create(context.Background()); err != nil {
+		return fmt.Errorf("create database tables: %w", err)
+	}
+
 	return app.SetupRoutes().Listen(app.config.Address())
 }
