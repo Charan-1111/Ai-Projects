@@ -14,6 +14,10 @@ type Repository interface {
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
+	if _, err := db.Db.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector"); err != nil {
+		return fmt.Errorf("create vector extension: %w", err)
+	}
+
 	for tableName, createQuery := range db.Queries.Create {
 		_, err := db.Db.Exec(ctx, createQuery)
 		if err != nil {
