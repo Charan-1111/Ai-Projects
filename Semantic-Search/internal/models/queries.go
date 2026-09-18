@@ -11,6 +11,5 @@ type Fetch struct {
 }
 
 type Save struct {
-	Conversation string `json:"conversation"`
-	Message      string `json:"message"`
+	Embedding string `json:"embedding"`
 }

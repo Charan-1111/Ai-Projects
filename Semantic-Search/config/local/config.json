@@ -54,8 +54,7 @@
             "messages": "SELECT role, content FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC"
         },
         "save": {
-            "conversation": "INSERT INTO conversations (id, user_id) VALUES ($1, $1) ON CONFLICT (id) DO NOTHING",
-            "message": "INSERT INTO messages (id, conversation_id, role, content) VALUES ($1, $2, $3, $4)"
+            "embedding": "INSERT INTO semantic (id, title, content, category, source, metadata, embedding) VALUES ($1, $2, $3, $4, $5, $6, $7)"
         }
     }
 }

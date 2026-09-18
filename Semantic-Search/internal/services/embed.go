@@ -27,10 +27,10 @@ func (s *Service) EmbedDocument(ctx context.Context, reqBody models.Document) (m
 	docID := uuid.NewString()
 	reqBody.DocId = docID
 
-	*s.documents = append(*s.documents, Document{
-		Document:     reqBody,
-		DocEmbedding: embed,
-	})
+	err = s.dbStore.SaveDocument(ctx, reqBody, embed)
+	if err != nil {
+		return models.DocumentResponse{}, err
+	}
 
 	docResposne := models.DocumentResponse{
 		DocId:           docID,

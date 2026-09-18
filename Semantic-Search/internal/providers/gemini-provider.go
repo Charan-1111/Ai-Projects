@@ -39,7 +39,10 @@ func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
 }
 
 func (gp *GeminiProvider) EmbedText(ctx context.Context, text string) ([]float32, error) {
-	result, err := gp.client.Models.EmbedContent(ctx, "gemini-embedding-001", genai.Text(text), nil)
+	outputDimensionality := int32(1536)
+	result, err := gp.client.Models.EmbedContent(ctx, "gemini-embedding-001", genai.Text(text), &genai.EmbedContentConfig{
+		OutputDimensionality: &outputDimensionality,
+	})
 	if err != nil {
 		return []float32{}, err
 	}
