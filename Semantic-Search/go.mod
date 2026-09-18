@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
+	github.com/pgvector/pgvector-go v0.4.1
 	github.com/rs/zerolog v1.35.1
 	google.golang.org/genai v1.71.0
 )
