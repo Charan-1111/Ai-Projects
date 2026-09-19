@@ -9,7 +9,8 @@ type Queries struct {
 }
 
 type Fetch struct {
-	Messages string `json:"messages"`
+	Messages         string `json:"messages"`
+	SimilarDocuments string `json:"similar_documents"`
 }
 
 type Save struct {
