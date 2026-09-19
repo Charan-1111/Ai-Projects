@@ -13,6 +13,7 @@ type Repository interface {
 	SaveDocument(ctx context.Context, document models.Document, embedding []float32) error
 	UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error)
 	DeleteDocument(ctx context.Context, docID string) (bool, error)
+	SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error)
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -57,4 +58,30 @@ func (db *DataBaseStore) DeleteDocument(ctx context.Context, docID string) (bool
 	}
 
 	return result.RowsAffected() > 0, nil
+}
+
+func (db *DataBaseStore) SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error) {
+	rows, err := db.Db.Query(ctx, db.Queries.Fetch.SimilarDocuments, pgvector.NewVector(queryEmbed), limit)
+	if err != nil {
+		return []models.SimilarDocuments{}, err
+	}
+	defer rows.Close()
+
+	similarDocuments := make([]models.SimilarDocuments, 0)
+
+	for rows.Next() {
+		var doc models.SimilarDocuments
+
+		err = rows.Scan(&doc.Id, &doc.DocTitle, &doc.DocContent, &doc.DocCategory, &doc.Similarity)
+		if err != nil {
+			return []models.SimilarDocuments{}, err
+		}
+
+		similarDocuments = append(similarDocuments, doc)
+	}
+	if err := rows.Err(); err != nil {
+		return []models.SimilarDocuments{}, err
+	}
+
+	return similarDocuments, nil
 }

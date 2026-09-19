@@ -31,6 +31,8 @@ func (app *Application) SetupRoutes() *fiber.App {
 	apiGroup.Post("/embed", appHandlers.EmbedText)
 	apiGroup.Post("/compare", appHandlers.CompareSimilarity)
 
+	apiGroup.Post("/search", appHandlers.SearchDocuments)
+
 	docGroup := apiGroup.Group("/document")
 	docGroup.Post("/inject", appHandlers.InjectDocument)
 	docGroup.Post("/inject/multiple", appHandlers.MultiDocumentUpload)

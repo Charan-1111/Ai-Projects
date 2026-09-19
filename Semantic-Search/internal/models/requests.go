@@ -21,3 +21,8 @@ type Document struct {
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 }
+
+type SearchRequest struct {
+	Query    string `json:"query"`
+	NoofDocs int    `json:"noOfDocs"`
+}
