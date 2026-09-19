@@ -55,6 +55,12 @@
         },
         "save": {
             "embedding": "INSERT INTO semantic (id, title, content, category, source, metadata, embedding) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+        },
+        "edit" : {
+            "document" : "UPDATE semantic SET title = $1, content = $2, category = $3, source = $4, metadata = $5, embedding = $6, updated_at = NOW() WHERE id = $7"
+        },
+        "delete" : {
+            "document" : "DELETE FROM semantic WHERE id = $1"
         }
     }
 }

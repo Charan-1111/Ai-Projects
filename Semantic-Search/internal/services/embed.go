@@ -40,3 +40,31 @@ func (s *Service) EmbedDocument(ctx context.Context, reqBody models.Document) (m
 
 	return docResposne, nil
 }
+
+func (s *Service) UpdateDocument(ctx context.Context, docID string, reqBody models.Document) (models.DocumentResponse, bool, error) {
+	embeddingFields := reqBody.DocTitle + " : " + reqBody.DocContent
+
+	embed, err := s.llmProvider.EmbedText(ctx, embeddingFields)
+	if err != nil {
+		return models.DocumentResponse{}, false, err
+	}
+
+	reqBody.DocId = docID
+	updated, err := s.dbStore.UpdateDocument(ctx, reqBody, embed)
+	if err != nil {
+		return models.DocumentResponse{}, false, err
+	}
+	if !updated {
+		return models.DocumentResponse{}, false, nil
+	}
+
+	return models.DocumentResponse{
+		DocId:           docID,
+		DocTitle:        reqBody.DocTitle,
+		EmbeddingStatus: "completed",
+	}, true, nil
+}
+
+func (s *Service) DeleteDocument(ctx context.Context, docID string) (bool, error) {
+	return s.dbStore.DeleteDocument(ctx, docID)
+}

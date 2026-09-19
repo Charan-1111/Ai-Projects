@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	Create(ctx context.Context) error
 	SaveDocument(ctx context.Context, document models.Document, embedding []float32) error
+	UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error)
+	DeleteDocument(ctx context.Context, docID string) (bool, error)
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -37,4 +39,22 @@ func (db *DataBaseStore) SaveDocument(ctx context.Context, document models.Docum
 	}
 
 	return nil
+}
+
+func (db *DataBaseStore) UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error) {
+	result, err := db.Db.Exec(ctx, db.Queries.Edit.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
+	if err != nil {
+		return false, fmt.Errorf("error updating document: %w", err)
+	}
+
+	return result.RowsAffected() > 0, nil
+}
+
+func (db *DataBaseStore) DeleteDocument(ctx context.Context, docID string) (bool, error) {
+	result, err := db.Db.Exec(ctx, db.Queries.Delete.Document, docID)
+	if err != nil {
+		return false, fmt.Errorf("error deleting document: %w", err)
+	}
+
+	return result.RowsAffected() > 0, nil
 }
