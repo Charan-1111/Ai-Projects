@@ -33,6 +33,7 @@ func (app *Application) SetupRoutes() *fiber.App {
 
 	docGroup := apiGroup.Group("/document")
 	docGroup.Post("/inject", appHandlers.InjectDocument)
+	docGroup.Post("/inject/multiple", appHandlers.MultiDocumentUpload)
 	docGroup.Put("/:docId", appHandlers.UpdateDocument)
 	docGroup.Delete("/:docId", appHandlers.DeleteDocument)
 

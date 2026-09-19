@@ -21,6 +21,21 @@ func (h *Handlers) InjectDocument(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Embedding successful", "contents": docResponse})
 }
 
+func (h *Handlers) MultiDocumentUpload(c fiber.Ctx) error {
+	var req []models.Document
+
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "Invalid request body"})
+	}
+
+	docResponses, err := h.service.EmbedMultiDocument(c.Context(), req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": "Error"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Embeddings successful", "contents": docResponses})
+}
+
 func (h *Handlers) UpdateDocument(c fiber.Ctx) error {
 	var docReq models.Document
 

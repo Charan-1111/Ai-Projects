@@ -41,6 +41,21 @@ func (s *Service) EmbedDocument(ctx context.Context, reqBody models.Document) (m
 	return docResposne, nil
 }
 
+func (s *Service) EmbedMultiDocument(ctx context.Context, req []models.Document) ([]models.DocumentResponse, error) {
+	responses := make([]models.DocumentResponse, 0, len(req))
+
+	for _, doc := range req {
+		response, err := s.EmbedDocument(ctx, doc)
+		if err != nil {
+			return nil, err
+		}
+
+		responses = append(responses, response)
+	}
+
+	return responses, nil
+}
+
 func (s *Service) UpdateDocument(ctx context.Context, docID string, reqBody models.Document) (models.DocumentResponse, bool, error) {
 	embeddingFields := reqBody.DocTitle + " : " + reqBody.DocContent
 
