@@ -4,6 +4,8 @@ type Queries struct {
 	Create map[string]string `json:"create"`
 	Fetch  Fetch             `json:"fetch"`
 	Save   Save              `json:"save"`
+	Edit   Edit              `json:"edit"`
+	Delete Delete            `json:"delete"`
 }
 
 type Fetch struct {
@@ -12,4 +14,12 @@ type Fetch struct {
 
 type Save struct {
 	Embedding string `json:"embedding"`
+}
+
+type Edit struct {
+	Document string `json:"document"`
+}
+
+type Delete struct {
+	Document string `json:"document"`
 }
