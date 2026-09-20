@@ -11,6 +11,7 @@ type Queries struct {
 type Fetch struct {
 	Messages         string `json:"messages"`
 	SimilarDocuments string `json:"similar_documents"`
+	ChunkedDocuments string `json:"chunked_documents"`
 }
 
 type Save struct {

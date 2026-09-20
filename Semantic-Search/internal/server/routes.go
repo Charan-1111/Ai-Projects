@@ -42,6 +42,8 @@ func (app *Application) SetupRoutes() *fiber.App {
 
 	chunkGroup := apiGroup.Group("/chunks")
 	chunkGroup.Post("/upload/document", appHandlers.UploadDocuments)
+	chunkGroup.Post("/search", appHandlers.SearchChunkedDocuments)
 
+	
 	return appServer
 }

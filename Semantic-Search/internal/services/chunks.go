@@ -35,3 +35,21 @@ func (s *Service) MakeChunksAndUpload(ctx context.Context, req []models.Document
 
 	return nil
 }
+
+func (s *Service) SearchChunkedDocuments(ctx context.Context, req models.SearchRequest) (models.ChunkedResponse, error) {
+	searchEmbed, err := s.llmProvider.EmbedText(ctx, req.Query)
+	if err != nil {
+
+	}
+
+	chunkDetails, err := s.dbStore.SearchChunkedDocuments(ctx, searchEmbed, req.NoofDocs)
+	if err != nil {
+
+	}
+
+	return models.ChunkedResponse{
+		Query:       req.Query,
+		Documents:   chunkDetails,
+		ResultCount: len(chunkDetails),
+	}, nil
+}
