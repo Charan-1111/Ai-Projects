@@ -9,9 +9,10 @@ type Queries struct {
 }
 
 type Fetch struct {
-	Messages         string `json:"messages"`
-	SimilarDocuments string `json:"similar_documents"`
-	ChunkedDocuments string `json:"chunked_documents"`
+	Messages               string `json:"messages"`
+	SimilarDocuments       string `json:"similar_documents"`
+	ChunkedDocuments       string `json:"chunked_documents"`
+	FilterChunkedDocuments string `json:"filter_chunked_documents"`
 }
 
 type Save struct {
