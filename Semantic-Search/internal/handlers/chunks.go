@@ -18,3 +18,7 @@ func (h *Handlers) UploadDocuments(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Chunks uploaded successfully"})
 }
+
+func (h *Handlers) SearchChunkedDocuments(c fiber.Ctx) error {
+	return nil
+}
