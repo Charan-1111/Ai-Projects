@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"semantic-search/internal/chunks"
 	"semantic-search/internal/config"
 	"semantic-search/internal/logging"
 	"semantic-search/internal/providers"
@@ -17,6 +18,7 @@ type Application struct {
 	llmProvider providers.LLMProvider
 	documents   *[]services.Document
 	dbStore     database.Repository
+	wordChunker *chunks.WordChunker
 }
 
 func NewApplication() (*Application, error) {
@@ -38,12 +40,18 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("create gemini provider: %w", err)
 	}
 
+	wordChunker, err := chunks.NewWordChunker(100, 20)
+	if err != nil {
+		return nil, fmt.Errorf("create word chunker: %w", err)
+	}
+
 	return &Application{
 		log:         log,
 		config:      applicationConfig,
 		llmProvider: geminiClient,
 		documents:   &[]services.Document{},
 		dbStore:     databaseStore,
+		wordChunker: wordChunker,
 	}, nil
 }
 

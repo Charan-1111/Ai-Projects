@@ -22,7 +22,7 @@ func (app *Application) SetupRoutes() *fiber.App {
 	}))
 	appServer.Use(middleware.RequestID)
 
-	service := services.NewService(app.config, app.log, app.llmProvider, app.documents, app.dbStore)
+	service := services.NewService(app.config, app.log, app.llmProvider, app.documents, app.dbStore, app.wordChunker)
 	appHandlers := handlers.NewHandlers(app.config, app.log, service)
 
 	appServer.Get("/health", appHandlers.HealthCheck)
@@ -38,6 +38,10 @@ func (app *Application) SetupRoutes() *fiber.App {
 	docGroup.Post("/inject/multiple", appHandlers.MultiDocumentUpload)
 	docGroup.Put("/:docId", appHandlers.UpdateDocument)
 	docGroup.Delete("/:docId", appHandlers.DeleteDocument)
+
+
+	chunkGroup := apiGroup.Group("/chunks")
+	chunkGroup.Post("/upload/document", appHandlers.UploadDocuments)
 
 	return appServer
 }

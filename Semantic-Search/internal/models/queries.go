@@ -15,10 +15,12 @@ type Fetch struct {
 
 type Save struct {
 	Embedding string `json:"embedding"`
+	Chunks    string `json:"chunks"`
 }
 
 type Edit struct {
-	Document string `json:"document"`
+	Document       string `json:"document"`
+	IndexingStatus string `json:"index_status"`
 }
 
 type Delete struct {
