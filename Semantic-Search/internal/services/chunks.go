@@ -42,7 +42,12 @@ func (s *Service) SearchChunkedDocuments(ctx context.Context, req models.SearchR
 
 	}
 
-	chunkDetails, err := s.dbStore.SearchChunkedDocuments(ctx, searchEmbed, req.NoofDocs)
+	var chunkDetails []models.ChunkDetails
+	if req.Filters != (models.Filters{}) {
+		chunkDetails, err = s.dbStore.SearchFilteredChunkedDocuments(ctx, searchEmbed, req.Filters.Category, req.Filters.Difficulty, req.NoofDocs)
+	} else {
+		chunkDetails, err = s.dbStore.SearchChunkedDocuments(ctx, searchEmbed, req.NoofDocs)
+	}
 	if err != nil {
 
 	}
