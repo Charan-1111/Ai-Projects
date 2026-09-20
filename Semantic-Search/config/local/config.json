@@ -48,20 +48,23 @@
     },
     "queries": {
         "create": {
-            "semantic" : "CREATE TABLE IF NOT EXISTS semantic (id UUID PRIMARY KEY, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT, source TEXT, metadata JSONB, embedding VECTOR(1536) NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW())"
+            "documents" : "CREATE TABLE IF NOT EXISTS documents (id UUID PRIMARY KEY, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT, source TEXT, metadata JSONB, embedding VECTOR(1536) NOT NULL, indexing_status TEXT NOT NULL DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW())",
+            "chunks" : "CREATE TABLE IF NOT EXISTS chunks (id UUID PRIMARY KEY, document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE, content TEXT NOT NULL, chunk_index INTEGER NOT NULL, start_position INTEGER, end_position INTEGER, embedding VECTOR(1536) NOT NULL, metadata JSONB, created_at TIMESTAMPTZ DEFAULT NOW())"
         },
         "fetch": {
             "messages": "SELECT role, content FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC",
-            "similar_documents" : "SELECT id, title, content , category, 1 - (embedding <=>  $1::vector) AS similarity FROM semantic ORDER BY embedding <=> $1::vector LIMIT $2"
+            "similar_documents" : "SELECT id, title, content , category, 1 - (embedding <=>  $1::vector) AS similarity FROM documents ORDER BY embedding <=> $1::vector LIMIT $2"
         },
         "save": {
-            "embedding": "INSERT INTO semantic (id, title, content, category, source, metadata, embedding) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+            "embedding": "INSERT INTO documents (id, title, content, category, source, metadata, embedding) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            "chunks" : "INSERT INTO chunks(id, document_id, content, chunk_index, start_position, end_position, embedding, metadata) VALUES($1, $2, $3, $4, $5, $6, $7, $8)"
         },
         "edit" : {
-            "document" : "UPDATE semantic SET title = $1, content = $2, category = $3, source = $4, metadata = $5, embedding = $6, updated_at = NOW() WHERE id = $7"
+            "document" : "UPDATE documents SET title = $1, content = $2, category = $3, source = $4, metadata = $5, embedding = $6, updated_at = NOW() WHERE id = $7",
+            "index_status" : "UPDATE documents SET indexing_status = 'true' WHERE id = $1"
         },
         "delete" : {
-            "document" : "DELETE FROM semantic WHERE id = $1"
+            "document" : "DELETE FROM documents WHERE id = $1"
         }
     }
 }

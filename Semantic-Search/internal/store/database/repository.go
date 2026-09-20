@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"semantic-search/internal/chunks"
 	"semantic-search/internal/models"
 
 	"github.com/pgvector/pgvector-go"
@@ -14,6 +15,7 @@ type Repository interface {
 	UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error)
 	DeleteDocument(ctx context.Context, docID string) (bool, error)
 	SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error)
+	UploadChunks(ctx context.Context, chunks []chunks.Chunks) error
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -84,4 +86,34 @@ func (db *DataBaseStore) SearchSimilarDocuments(ctx context.Context, queryEmbed 
 	}
 
 	return similarDocuments, nil
+}
+
+func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunks) error {
+	dbTxn, err := db.Db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin chunk upload transaction: %w", err)
+	}
+	defer dbTxn.Rollback(ctx)
+
+	docId := ""
+
+	for _, chunk := range chunks {
+		// uploading to the database
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed), map[string]any{})
+		if err != nil {
+			return fmt.Errorf("save chunk %d: %w", chunk.Index, err)
+		}
+		docId = chunk.DocId
+	}
+
+	// updating the indexing_status in documents table for the given document
+	_, err = dbTxn.Exec(ctx, db.Queries.Edit.IndexingStatus, docId)
+	if err != nil {
+		return fmt.Errorf("update indexing status: %w", err)
+	}
+	if err := dbTxn.Commit(ctx); err != nil {
+		return fmt.Errorf("commit chunk upload transaction: %w", err)
+	}
+
+	return nil
 }
