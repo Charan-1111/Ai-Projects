@@ -26,6 +26,7 @@ func (s *Service) MakeChunksAndUpload(ctx context.Context, req []models.Document
 
 			chunks[index].ChunkEmbed = chunkEmbed
 			chunks[index].DocId = docResponse.DocId
+			chunks[index].MetaData = doc.MetaData
 		}
 
 		if err := s.dbStore.UploadChunks(ctx, chunks); err != nil {

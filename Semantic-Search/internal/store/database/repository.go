@@ -99,7 +99,7 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 
 	for _, chunk := range chunks {
 		// uploading to the database
-		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed), map[string]any{})
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed), chunk.MetaData)
 		if err != nil {
 			return fmt.Errorf("save chunk %d: %w", chunk.Index, err)
 		}

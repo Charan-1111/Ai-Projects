@@ -17,6 +17,7 @@ type Chunks struct {
 	EndPosition   int // ending word index, exclusive
 	ChunkEmbed    []float32
 	DocId         string
+	MetaData      map[string]any
 }
 
 type WordChunker struct {

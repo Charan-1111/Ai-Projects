@@ -40,7 +40,7 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("create gemini provider: %w", err)
 	}
 
-	wordChunker, err := chunks.NewWordChunker(100, 20)
+	wordChunker, err := chunks.NewWordChunker(10, 3)
 	if err != nil {
 		return nil, fmt.Errorf("create word chunker: %w", err)
 	}
