@@ -25,3 +25,17 @@ type SearchResponse struct {
 	ResultCount      int                `json:"resultCount"`
 	DurationMs       int                `json:"durationMs"`
 }
+
+type ChunkDetails struct {
+	Id         string  `json:"id"`
+	DocumentId string  `json:"document_id"`
+	Content    string  `json:"content"`
+	Similarity float32 `json:"similarity"`
+}
+
+type ChunkedResponse struct {
+	Query       string         `json:"query"`
+	Documents   []ChunkDetails `json:"Documents"`
+	ResultCount int            `json:"resultCount"`
+	DurationMs  int            `json:"durationMs"`
+}

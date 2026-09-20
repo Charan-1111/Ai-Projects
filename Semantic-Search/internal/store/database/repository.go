@@ -16,6 +16,7 @@ type Repository interface {
 	DeleteDocument(ctx context.Context, docID string) (bool, error)
 	SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error)
 	UploadChunks(ctx context.Context, chunks []chunks.Chunks) error
+	SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int) ([]models.ChunkDetails, error)
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -99,7 +100,7 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 
 	for _, chunk := range chunks {
 		// uploading to the database
-		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed), chunk.MetaData)
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed))
 		if err != nil {
 			return fmt.Errorf("save chunk %d: %w", chunk.Index, err)
 		}
@@ -116,4 +117,27 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 	}
 
 	return nil
+}
+
+func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int) ([]models.ChunkDetails, error) {
+	rows, err := db.Db.Query(ctx, db.Queries.Fetch.ChunkedDocuments, pgvector.NewVector(embedding), limit)
+	if err != nil {
+		return []models.ChunkDetails{}, err
+	}
+	defer rows.Close()
+
+	chunkDetails := make([]models.ChunkDetails, 0)
+
+	for rows.Next() {
+		var chunk models.ChunkDetails
+
+		err := rows.Scan(&chunk.Id, &chunk.DocumentId, &chunk.Content, &chunk.Similarity)
+		if err != nil {
+			return []models.ChunkDetails{}, err
+		}
+
+		chunkDetails = append(chunkDetails, chunk)
+	}
+
+	return chunkDetails, nil
 }
