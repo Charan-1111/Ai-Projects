@@ -23,6 +23,12 @@ type Document struct {
 }
 
 type SearchRequest struct {
-	Query    string `json:"query"`
-	NoofDocs int    `json:"noOfDocs"`
+	Query    string  `json:"query"`
+	NoofDocs int     `json:"noOfDocs"`
+	Filters  Filters `json:"filters"`
+}
+
+type Filters struct {
+	Category   string `json:"category"`
+	Difficulty string `json:"difficulty"`
 }

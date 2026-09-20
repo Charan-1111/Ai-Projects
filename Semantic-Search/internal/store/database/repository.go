@@ -131,7 +131,7 @@ func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding [
 	for rows.Next() {
 		var chunk models.ChunkDetails
 
-		err := rows.Scan(&chunk.Id, &chunk.DocumentId, &chunk.Content, &chunk.Similarity)
+		err := rows.Scan(&chunk.Id, &chunk.DocumentId, &chunk.Content, &chunk.ChunkIndex, &chunk.Similarity, &chunk.DocumentTitle, &chunk.Category, &chunk.Metadata)
 		if err != nil {
 			return []models.ChunkDetails{}, err
 		}

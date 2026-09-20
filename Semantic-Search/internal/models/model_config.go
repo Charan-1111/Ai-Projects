@@ -14,3 +14,8 @@ type Embeddings struct {
 	Text       string `json:"text"`
 	MultiModal string `json:"multimodal"`
 }
+
+type Chunk struct {
+	ChunkSize    int `json:"chunk_size"`
+	ChunkOverlap int `json:"chunk_overlap"`
+}

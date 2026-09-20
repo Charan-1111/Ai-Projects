@@ -13,6 +13,7 @@ type Configuration struct {
 	AvailableModels map[string]models.ModelConfig `json:"available_models"`
 	DefaultModel    string                        `json:"default_model"`
 	EmbeddingModels models.Embeddings             `json:"embedding_models"`
+	ChunkDetails    models.Chunk                  `json:"chunk_details"`
 	Retries         models.Retries                `json:"retries"`
 	Queries         models.Queries                `json:"queries"`
 	once            sync.Once
