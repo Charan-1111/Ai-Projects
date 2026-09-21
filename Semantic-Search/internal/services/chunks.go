@@ -44,9 +44,9 @@ func (s *Service) SearchChunkedDocuments(ctx context.Context, req models.SearchR
 
 	var chunkDetails []models.ChunkDetails
 	if req.Filters != (models.Filters{}) {
-		chunkDetails, err = s.dbStore.SearchFilteredChunkedDocuments(ctx, searchEmbed, req.Filters.Category, req.Filters.Difficulty, req.NoofDocs)
+		chunkDetails, err = s.dbStore.SearchFilteredChunkedDocuments(ctx, searchEmbed, req.Filters.Category, req.Filters.Difficulty, req.NoofDocs, req.MinimumScore)
 	} else {
-		chunkDetails, err = s.dbStore.SearchChunkedDocuments(ctx, searchEmbed, req.NoofDocs)
+		chunkDetails, err = s.dbStore.SearchChunkedDocuments(ctx, searchEmbed, req.NoofDocs, req.MinimumScore)
 	}
 	if err != nil {
 

@@ -16,8 +16,8 @@ type Repository interface {
 	DeleteDocument(ctx context.Context, docID string) (bool, error)
 	SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error)
 	UploadChunks(ctx context.Context, chunks []chunks.Chunks) error
-	SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int) ([]models.ChunkDetails, error)
-	SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int) ([]models.ChunkDetails, error)
+	SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int, minScore float32) ([]models.ChunkDetails, error)
+	SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int, minScore float32) ([]models.ChunkDetails, error)
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -120,8 +120,8 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 	return nil
 }
 
-func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int) ([]models.ChunkDetails, error) {
-	rows, err := db.Db.Query(ctx, db.Queries.Fetch.ChunkedDocuments, pgvector.NewVector(embedding), limit)
+func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int, minScore float32) ([]models.ChunkDetails, error) {
+	rows, err := db.Db.Query(ctx, db.Queries.Fetch.ChunkedDocuments, pgvector.NewVector(embedding), limit, minScore)
 	if err != nil {
 		return []models.ChunkDetails{}, err
 	}
@@ -143,8 +143,8 @@ func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding [
 	return chunkDetails, nil
 }
 
-func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int) ([]models.ChunkDetails, error) {
-	rows, err := db.Db.Query(ctx, db.Queries.Fetch.FilterChunkedDocuments, pgvector.NewVector(embedding), category, difficulty, limit)
+func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int, minScore float32) ([]models.ChunkDetails, error) {
+	rows, err := db.Db.Query(ctx, db.Queries.Fetch.FilterChunkedDocuments, pgvector.NewVector(embedding), category, difficulty, limit, minScore)
 	if err != nil {
 		return []models.ChunkDetails{}, err
 	}
