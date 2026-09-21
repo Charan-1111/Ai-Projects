@@ -23,9 +23,10 @@ type Document struct {
 }
 
 type SearchRequest struct {
-	Query    string  `json:"query"`
-	NoofDocs int     `json:"noOfDocs"`
-	Filters  Filters `json:"filters"`
+	Query        string  `json:"query"`
+	NoofDocs     int     `json:"noOfDocs"`
+	Filters      Filters `json:"filters"`
+	MinimumScore float32 `json:"minimumScore"`
 }
 
 type Filters struct {
