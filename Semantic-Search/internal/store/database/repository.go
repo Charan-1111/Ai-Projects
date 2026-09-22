@@ -13,6 +13,7 @@ type Repository interface {
 	Create(ctx context.Context) error
 	SaveDocument(ctx context.Context, document models.Document, embedding []float32) error
 	UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error)
+	UpdateDocumentWithChunks(ctx context.Context, document models.Document, embedding []float32, documentChunks []chunks.Chunks) (bool, error)
 	DeleteDocument(ctx context.Context, docID string) (bool, error)
 	SearchSimilarDocuments(ctx context.Context, queryEmbed []float32, limit int) ([]models.SimilarDocuments, error)
 	UploadChunks(ctx context.Context, chunks []chunks.Chunks) error
@@ -55,10 +56,59 @@ func (db *DataBaseStore) UpdateDocument(ctx context.Context, document models.Doc
 	return result.RowsAffected() > 0, nil
 }
 
+func (db *DataBaseStore) UpdateDocumentWithChunks(ctx context.Context, document models.Document, embedding []float32, documentChunks []chunks.Chunks) (bool, error) {
+	dbTxn, err := db.Db.Begin(ctx)
+	if err != nil {
+		return false, fmt.Errorf("begin document update transaction: %w", err)
+	}
+	defer dbTxn.Rollback(ctx)
+
+	result, err := dbTxn.Exec(ctx, db.Queries.Edit.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
+	if err != nil {
+		return false, fmt.Errorf("update document: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return false, nil
+	}
+
+	if _, err := dbTxn.Exec(ctx, db.Queries.Delete.Chunks, document.DocId); err != nil {
+		return false, fmt.Errorf("delete old document chunks: %w", err)
+	}
+
+	for _, documentChunk := range documentChunks {
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, documentChunk.Id, documentChunk.DocId, documentChunk.Content, documentChunk.Index, documentChunk.StartPosition, documentChunk.EndPosition, pgvector.NewVector(documentChunk.ChunkEmbed))
+		if err != nil {
+			return false, fmt.Errorf("save updated chunk %d: %w", documentChunk.Index, err)
+		}
+	}
+
+	if _, err := dbTxn.Exec(ctx, db.Queries.Edit.IndexingStatus, document.DocId); err != nil {
+		return false, fmt.Errorf("update indexing status: %w", err)
+	}
+	if err := dbTxn.Commit(ctx); err != nil {
+		return false, fmt.Errorf("commit document update transaction: %w", err)
+	}
+
+	return true, nil
+}
+
 func (db *DataBaseStore) DeleteDocument(ctx context.Context, docID string) (bool, error) {
-	result, err := db.Db.Exec(ctx, db.Queries.Delete.Document, docID)
+	dbTxn, err := db.Db.Begin(ctx)
+	if err != nil {
+		return false, fmt.Errorf("begin document deletion transaction: %w", err)
+	}
+	defer dbTxn.Rollback(ctx)
+
+	if _, err := dbTxn.Exec(ctx, db.Queries.Delete.Chunks, docID); err != nil {
+		return false, fmt.Errorf("delete document chunks: %w", err)
+	}
+
+	result, err := dbTxn.Exec(ctx, db.Queries.Delete.Document, docID)
 	if err != nil {
 		return false, fmt.Errorf("error deleting document: %w", err)
+	}
+	if err := dbTxn.Commit(ctx); err != nil {
+		return false, fmt.Errorf("commit document deletion transaction: %w", err)
 	}
 
 	return result.RowsAffected() > 0, nil

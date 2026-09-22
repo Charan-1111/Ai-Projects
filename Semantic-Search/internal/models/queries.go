@@ -27,4 +27,5 @@ type Edit struct {
 
 type Delete struct {
 	Document string `json:"document"`
+	Chunks   string `json:"chunks"`
 }

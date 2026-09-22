@@ -64,8 +64,22 @@ func (s *Service) UpdateDocument(ctx context.Context, docID string, reqBody mode
 		return models.DocumentResponse{}, false, err
 	}
 
+	documentChunks, err := s.wordChunker.Split(ctx, reqBody.DocContent)
+	if err != nil {
+		return models.DocumentResponse{}, false, err
+	}
+	for index := range documentChunks {
+		chunkEmbed, err := s.llmProvider.EmbedText(ctx, documentChunks[index].Content)
+		if err != nil {
+			return models.DocumentResponse{}, false, err
+		}
+
+		documentChunks[index].ChunkEmbed = chunkEmbed
+		documentChunks[index].DocId = docID
+	}
+
 	reqBody.DocId = docID
-	updated, err := s.dbStore.UpdateDocument(ctx, reqBody, embed)
+	updated, err := s.dbStore.UpdateDocumentWithChunks(ctx, reqBody, embed, documentChunks)
 	if err != nil {
 		return models.DocumentResponse{}, false, err
 	}
