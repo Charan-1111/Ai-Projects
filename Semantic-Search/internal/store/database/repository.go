@@ -189,6 +189,9 @@ func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding [
 
 		chunkDetails = append(chunkDetails, chunk)
 	}
+	if err := rows.Err(); err != nil {
+		return []models.ChunkDetails{}, err
+	}
 
 	return chunkDetails, nil
 }
@@ -211,6 +214,9 @@ func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, emb
 		}
 
 		chunkDetails = append(chunkDetails, chunk)
+	}
+	if err := rows.Err(); err != nil {
+		return []models.ChunkDetails{}, err
 	}
 
 	return chunkDetails, nil
