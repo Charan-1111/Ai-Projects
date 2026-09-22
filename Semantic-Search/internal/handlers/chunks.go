@@ -27,7 +27,7 @@ func (h *Handlers) SearchChunkedDocuments(c fiber.Ctx) error {
 
 	documents, err := h.service.SearchChunkedDocuments(c.Context(), req)
 	if err != nil {
-
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Documents retrieved successful", "contents": documents})
 }
