@@ -6,6 +6,7 @@ require (
 	github.com/bytedance/sonic v1.15.4
 	github.com/gofiber/fiber/v3 v3.5.0
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/zerolog v1.35.1
 )
 
 require (
