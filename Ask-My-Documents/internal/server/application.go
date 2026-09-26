@@ -1,12 +1,14 @@
 package server
 
 import (
+	"ask-my-documents/internal/clients"
 	"ask-my-documents/internal/config"
 	"fmt"
 )
 
 type Application struct {
-	config *config.Configuration
+	config  *config.Configuration
+	clients *clients.Clients
 }
 
 func NewApplication() (*Application, error) {
@@ -16,8 +18,11 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("Loading server configuration : %w", err)
 	}
 
+	clients := clients.NewClient()
+
 	return &Application{
-		config: config,
+		config:  config,
+		clients: clients,
 	}, nil
 }
 
@@ -35,12 +40,10 @@ func (app *Application) StartFiberServer() {
 		listenErr <- appServer.Listen(app.config.Server.Port)
 	}()
 
-
-
 	select {
 	case <-listenErr:
 		fmt.Println("Server is unable to listen on the port : ", app.config.Server.Port)
-	// case 
-	// TODO : Need to have the graceful shutdown code ready
+		// case
+		// TODO : Need to have the graceful shutdown code ready
 	}
 }
