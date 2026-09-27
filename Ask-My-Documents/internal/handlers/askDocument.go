@@ -22,9 +22,9 @@ func (h *Handlers) AskDocuments(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "minimumScore must be >= 0"})
 	}
 
-	llmResponse, err := h.service.AskDocuments(c.Context(), req)
+	answerResponse, err := h.service.AskDocuments(c.Context(), req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": err.Error()})
 	}
-	return c.Status(fiber.StatusOK).JSON(llmResponse)
+	return c.Status(fiber.StatusOK).JSON(answerResponse)
 }
