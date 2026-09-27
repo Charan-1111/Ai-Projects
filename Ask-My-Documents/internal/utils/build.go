@@ -10,7 +10,7 @@ func BuildContext(documents []models.SemanticDocuments) (string, map[int]models.
 	var context strings.Builder
 	sources := make(map[int]models.Citations, len(documents))
 
-	reference := 0
+	reference := 1
 
 	for _, doc := range documents {
 		content := strings.TrimSpace(doc.Content)
@@ -28,7 +28,7 @@ func BuildContext(documents []models.SemanticDocuments) (string, map[int]models.
 			content,
 		)
 
-		sources[reference + 1] = models.Citations{
+		sources[reference] = models.Citations{
 			Reference:  reference,
 			DocumentId: doc.DocumentId,
 			ChunkId:    doc.Id,

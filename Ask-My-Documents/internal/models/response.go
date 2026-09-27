@@ -30,3 +30,15 @@ type LLMResponse struct {
 	TotalTokens  int    `json:"total_tokens"`
 	FinishReason string `json:"finish_reason"`
 }
+
+type AnswerResponse struct {
+	Answer    string     `json:"answer"`
+	Citations []Citation `json:"citations"`
+}
+
+type Citation struct {
+	Reference  int    `json:"reference"`
+	DocumentID string `json:"document_id"`
+	ChunkID    string `json:"chunk_id"`
+	Title      string `json:"title"`
+}

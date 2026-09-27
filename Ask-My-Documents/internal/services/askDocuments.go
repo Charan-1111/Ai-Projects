@@ -6,9 +6,10 @@ import (
 	"ask-my-documents/internal/utils"
 	"context"
 	"fmt"
+	"sort"
 )
 
-func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*models.LLMResponse, error) {
+func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*models.AnswerResponse, error) {
 	noOfDocs := req.NoOfDocs
 	if noOfDocs <= 0 {
 		noOfDocs = 5
@@ -35,8 +36,8 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 
 	contextText, sources := utils.BuildContext(semanticResponse.Contents.Documents)
 	if len(sources) == 0 {
-		return &models.LLMResponse{
-			Text: "I could not find that information in the uploaded documents.",
+		return &models.AnswerResponse{
+			Answer: "I could not find that information in the uploaded documents.",
 		}, nil
 	}
 
@@ -47,5 +48,24 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 		return nil, fmt.Errorf("llm generation failed: %w", err)
 	}
 
-	return llmResponse, nil
+	citations := make([]models.Citation, 0, len(sources))
+	keys := make([]int, 0, len(sources))
+	for ref := range sources {
+		keys = append(keys, ref)
+	}
+	sort.Ints(keys)
+	for _, ref := range keys {
+		source := sources[ref]
+		citations = append(citations, models.Citation{
+			Reference:  source.Reference,
+			DocumentID: source.DocumentId,
+			ChunkID:    source.ChunkId,
+			Title:      source.Title,
+		})
+	}
+
+	return &models.AnswerResponse{
+		Answer:    llmResponse.Text,
+		Citations: citations,
+	}, nil
 }
