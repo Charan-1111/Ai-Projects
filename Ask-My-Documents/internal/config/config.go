@@ -10,7 +10,7 @@ import (
 )
 
 type Configuration struct {
-	Env          string              `json:"evn"`
+	Env          string              `json:"env"`
 	Server       models.Server       `json:"server"`
 	ExternalApis models.ExternalApis `json:"externalApis"`
 	once         sync.Once
