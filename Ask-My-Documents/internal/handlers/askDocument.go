@@ -12,6 +12,9 @@ func (h *Handlers) AskDocuments(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "Invalid request body"})
 	}
 
-	h.service.AskDocuments(c.Context(), req)
-	return nil
+	semanticResponse, err := h.service.AskDocuments(c.Context(), req)
+	if err != nil {
+
+	}
+	return c.Status(fiber.StatusOK).JSON(semanticResponse)
 }
