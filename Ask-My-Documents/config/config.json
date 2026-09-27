@@ -1,10 +1,11 @@
 {
     "env" : "local",
     "server" : {
-        "port" : ":8001",
+        "port" : ":8002",
         "name" : "Ask My Documents"
     },
     "externalApis" : {
-        "semanticSearch" : "http://localhost:8000/semantic/chunks/search"
+        "semanticSearch" : "http://localhost:8001/semantic/chunks/search",
+        "chat" : "http://localhost:8000/v1/llm/chat"
     }
 }

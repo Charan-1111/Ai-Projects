@@ -1,6 +1,6 @@
 {
     "env": "local",
-    "port": "8000",
+    "port": "8001",
     "available_models": {
         "reasoning-model": {
             "display_name": "Gemini-3.7 Flash",

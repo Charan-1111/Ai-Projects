@@ -17,11 +17,11 @@ type Message struct {
 }
 
 type GenerateResponse struct {
-	Text         string
-	InputTokens  int64
-	OutputTokens int64
-	TotalTokens  int64
-	FinishReason string
+	Text         string `json:"text"`
+	InputTokens  int64  `json:"input_tokens"`
+	OutputTokens int64  `json:"output_tokens"`
+	TotalTokens  int64  `json:"total_tokens"`
+	FinishReason string `json:"finish_reason"`
 }
 
 type StreamChunk struct {

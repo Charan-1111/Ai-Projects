@@ -28,7 +28,7 @@ func BuildContext(documents []models.SemanticDocuments) (string, map[int]models.
 			content,
 		)
 
-		sources[reference] = models.Citations{
+		sources[reference + 1] = models.Citations{
 			Reference:  reference,
 			DocumentId: doc.DocumentId,
 			ChunkId:    doc.Id,
