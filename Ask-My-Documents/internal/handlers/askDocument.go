@@ -14,7 +14,7 @@ func (h *Handlers) AskDocuments(c fiber.Ctx) error {
 
 	semanticResponse, err := h.service.AskDocuments(c.Context(), req)
 	if err != nil {
-
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(semanticResponse)
 }
