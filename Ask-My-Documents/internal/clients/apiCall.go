@@ -3,6 +3,8 @@ package clients
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -10,7 +12,7 @@ import (
 )
 
 type ApiInterface interface {
-	ApiCall(ctx context.Context)
+	ApiCall(ctx context.Context) ([]byte, error)
 }
 
 type OutboundCall struct {
@@ -34,10 +36,15 @@ func NewOutboundCall(url string, method string, queryParams map[string]string, b
 }
 
 func buildUrl(url string, queryParams map[string]string) string {
-	var sb strings.Builder
+	if len(queryParams) == 0 {
+		return url
+	}
 
+	var sb strings.Builder
 	sb.WriteString(url)
-	sb.WriteString("?")
+	if strings.ContainsRune(url, '?') == false {
+		sb.WriteString("?")
+	}
 	for key, value := range queryParams {
 		sb.WriteString(key)
 		sb.WriteString("=")
@@ -45,35 +52,52 @@ func buildUrl(url string, queryParams map[string]string) string {
 		sb.WriteString("&")
 	}
 
-	return sb.String()
+	return strings.TrimRight(sb.String(), "&")
 }
 
-func (ob *OutboundCall) ApiCall(ctx context.Context) {
-	finalUrl := buildUrl(ob.url, ob.queryParams)
-
-	bodyBytes, err := sonic.Marshal(ob.bodyParams)
-	if err != nil {
-
+func (ob *OutboundCall) ApiCall(ctx context.Context) ([]byte, error) {
+	if ob == nil || ob.clients == nil || ob.clients.clients == nil {
+		return nil, fmt.Errorf("invalid outbound call configuration")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, ob.method, finalUrl, bytes.NewBuffer(bodyBytes))
-	if err != nil {
+	finalURL := buildUrl(ob.url, ob.queryParams)
 
+	var bodyReader io.Reader = http.NoBody
+	if len(ob.bodyParams) > 0 {
+		bodyBytes, err := sonic.Marshal(ob.bodyParams)
+		if err != nil {
+			return nil, err
+		}
+		bodyReader = bytes.NewBuffer(bodyBytes)
 	}
 
-	// setting headers
+	req, err := http.NewRequestWithContext(ctx, ob.method, finalURL, bodyReader)
+	if err != nil {
+		return nil, err
+	}
+
 	for key, value := range ob.headers {
 		req.Header.Set(key, value)
+	}
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	resp, err := ob.clients.clients.Do(req)
 	if err != nil {
-
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
 
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		fmt.Println("response body :", string(responseBody))
+		return responseBody, fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(responseBody))
+	}
+
+	return responseBody, nil
 }
