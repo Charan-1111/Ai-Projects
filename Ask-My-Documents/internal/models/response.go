@@ -22,3 +22,11 @@ type SemanticDocuments struct {
 	Category   string         `json:"category"`
 	Metadata   map[string]any `json:"metadata"`
 }
+
+type LLMResponse struct {
+	Text         string `json:"text"`
+	InputTokens  int    `json:"input_tokens"`
+	OutputTokens int    `json:"output_tokens"`
+	TotalTokens  int    `json:"total_tokens"`
+	FinishReason string `json:"finish_reason"`
+}

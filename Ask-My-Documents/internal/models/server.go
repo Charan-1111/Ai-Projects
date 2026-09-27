@@ -7,4 +7,5 @@ type Server struct {
 
 type ExternalApis struct {
 	SemanticSearch string `json:"semanticSearch"`
+	Chat           string `json:"chat"`
 }
