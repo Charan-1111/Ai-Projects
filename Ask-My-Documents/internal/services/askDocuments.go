@@ -48,7 +48,7 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 	if err != nil {
 		return nil, fmt.Errorf("llm generation failed: %w", err)
 	}
-	if strings.TrimSpace(llmResponse.Text) == "" {
+	if strings.TrimSpace(llmResponse.Response) == "" {
 		return nil, fmt.Errorf("llm response is empty")
 	}
 
@@ -59,7 +59,7 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 	}
 	sort.Ints(keys)
 	for _, ref := range keys {
-		if !strings.Contains(llmResponse.Text, fmt.Sprintf("[%d]", ref)) {
+		if !strings.Contains(llmResponse.Response, fmt.Sprintf("[%d]", ref)) {
 			continue
 		}
 
@@ -73,7 +73,7 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 	}
 
 	return &models.AnswerResponse{
-		Answer:    llmResponse.Text,
+		Answer:    llmResponse.Response,
 		Citations: citations,
 	}, nil
 }
