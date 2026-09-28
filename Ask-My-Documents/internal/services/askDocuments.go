@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 )
 
 func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*models.AnswerResponse, error) {
@@ -47,6 +48,9 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 	if err != nil {
 		return nil, fmt.Errorf("llm generation failed: %w", err)
 	}
+	if strings.TrimSpace(llmResponse.Text) == "" {
+		return nil, fmt.Errorf("llm response is empty")
+	}
 
 	citations := make([]models.Citation, 0, len(sources))
 	keys := make([]int, 0, len(sources))
@@ -55,6 +59,10 @@ func (s *Service) AskDocuments(ctx context.Context, req models.AskDocument) (*mo
 	}
 	sort.Ints(keys)
 	for _, ref := range keys {
+		if !strings.Contains(llmResponse.Text, fmt.Sprintf("[%d]", ref)) {
+			continue
+		}
+
 		source := sources[ref]
 		citations = append(citations, models.Citation{
 			Reference:  source.Reference,

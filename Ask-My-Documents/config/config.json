@@ -6,6 +6,6 @@
     },
     "externalApis" : {
         "semanticSearch" : "http://localhost:8001/semantic/chunks/search",
-        "chat" : "http://localhost:8000/v1/llm/chat"
+        "chat" : "http://localhost:8000/v1/llm/generate"
     }
 }
