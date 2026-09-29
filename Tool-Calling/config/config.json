@@ -1,0 +1,7 @@
+{
+    "env" : "local",
+    "server" : {
+        "name" : "Tool Calling",
+        "port" : ":8003"
+    }
+}
