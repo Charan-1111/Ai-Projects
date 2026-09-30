@@ -7,21 +7,25 @@ type Application struct {
 }
 
 func NewApplication() (*Application, error) {
-	config := &config.Configuration{}
-	err := config.LoadConfig()
-	if err != nil {
-
+	cfg := &config.Configuration{}
+	if err := cfg.LoadConfig(); err != nil {
+		return nil, err
 	}
 
-	return &Application{
-		config: config,
-	}, nil
+	return &Application{config: cfg}, nil
 }
 
 func (app *Application) StartServer() {
-
+	appServer := app.Router()
+	port := app.config.Server.Port
+	if port == "" {
+		port = ":8003"
+	}
+	if err := appServer.Listen(port); err != nil {
+		panic(err)
+	}
 }
 
 func (app *Application) StartFiberServer() {
-	// appServer :=- 
+	app.StartServer()
 } 

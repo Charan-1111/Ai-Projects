@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 	"tool-calling/internal/models"
 
@@ -16,6 +17,9 @@ type Configuration struct {
 
 func (c *Configuration) LoadConfig() error {
 	filePath := os.Getenv("CONFIG_PATH")
+	if filePath == "" {
+		filePath = filepath.Join(".", "config", "config.json")
+	}
 
 	var loadErr error
 
