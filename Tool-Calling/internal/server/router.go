@@ -2,6 +2,7 @@ package server
 
 import (
 	"tool-calling/internal/handler"
+	"tool-calling/internal/services"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -16,8 +17,13 @@ func (app *Application) Router() *fiber.App {
 
 	apiGroup := appServer.Group("/assistant")
 
-	handler := handler.NewHandler(app.config)
+	services := services.NewService(app.config)
+	handler := handler.NewHandler(app.config, services)
 
 	apiGroup.Post("/chat", handler.GetTime)
+
+	toolsGroup := appServer.Group("/tools")
+	toolsGroup.Get("/", handler.ListTools)
+	toolsGroup.Post("/execute", handler.ExecuteTool)
 	return appServer
 }
