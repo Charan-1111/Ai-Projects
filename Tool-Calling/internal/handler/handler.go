@@ -1,13 +1,18 @@
 package handler
 
-import "tool-calling/internal/config"
+import (
+	"tool-calling/internal/config"
+	"tool-calling/internal/services"
+)
 
 type Handler struct {
-	config *config.Configuration
+	config   *config.Configuration
+	services *services.Service
 }
 
-func NewHandler(config *config.Configuration) *Handler {
+func NewHandler(config *config.Configuration, s *services.Service) *Handler {
 	return &Handler{
-		config: config,
+		config:   config,
+		services: s,
 	}
 }
