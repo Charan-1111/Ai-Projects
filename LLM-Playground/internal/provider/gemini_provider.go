@@ -11,12 +11,18 @@ import (
 type GeminiProvider struct {
 	client           *genai.Client
 	ToolDeclarations []*genai.FunctionDeclaration
+	toolExecutor     ToolExecutor
 }
 
 func NewGeminiProvider(client *genai.Client) *GeminiProvider {
 	return &GeminiProvider{
 		client: client,
 	}
+}
+
+func (g *GeminiProvider) ConfigureTools(declarations []*genai.FunctionDeclaration, executor ToolExecutor) {
+	g.ToolDeclarations = declarations
+	g.toolExecutor = executor
 }
 
 func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*GenerateResponse, int, error) {
@@ -50,21 +56,93 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 		return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
 	}
 
-	if response == nil || response.UsageMetadata == nil {
-		classifiedErr := ClassifyError("gemini", fmt.Errorf("response generation error"))
-		return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
-	}
+	var inputTokens, outputTokens, totalTokens int64
+	const maxToolCallRounds = 8
+	for round := 0; ; round++ {
+		if response == nil || len(response.Candidates) == 0 {
+			classifiedErr := ClassifyError("gemini", fmt.Errorf("response generation error: no candidates returned"))
+			return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
+		}
+		if usage := response.UsageMetadata; usage != nil {
+			inputTokens += int64(usage.PromptTokenCount)
+			outputTokens += int64(usage.CandidatesTokenCount)
+			totalTokens += int64(usage.TotalTokenCount)
+		}
 
-	providerResponse := GenerateResponse{}
-	providerResponse.Text = response.Text()
-	providerResponse.InputTokens = int64(response.UsageMetadata.PromptTokenCount)
-	providerResponse.OutputTokens = int64(response.UsageMetadata.CandidatesTokenCount)
-	providerResponse.TotalTokens = int64(response.UsageMetadata.TotalTokenCount)
-	providerResponse.FinishReason = string(response.Candidates[0].FinishReason)
-	return &providerResponse, 200, nil
+		candidate := response.Candidates[0]
+		functionCalls := geminiFunctionCalls(candidate.Content)
+		if len(functionCalls) == 0 {
+			return &GenerateResponse{
+				Text:         response.Text(),
+				InputTokens:  inputTokens,
+				OutputTokens: outputTokens,
+				TotalTokens:  totalTokens,
+				FinishReason: string(candidate.FinishReason),
+			}, 200, nil
+		}
+		if round >= maxToolCallRounds {
+			classifiedErr := ClassifyError("gemini", fmt.Errorf("tool call limit (%d) exceeded", maxToolCallRounds))
+			return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
+		}
+		if g.toolExecutor == nil {
+			classifiedErr := ClassifyError("gemini", fmt.Errorf("model requested a tool call but no tool executor is configured"))
+			return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
+		}
+		if candidate.Content == nil {
+			classifiedErr := ClassifyError("gemini", fmt.Errorf("model returned tool calls without candidate content"))
+			return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
+		}
+
+		contents = append(contents, candidate.Content)
+		functionResponses := make([]*genai.Part, 0, len(functionCalls))
+		for _, functionCall := range functionCalls {
+			toolResult, executionErr := g.toolExecutor.ToolExecution(ctx, functionCall.Name, functionCall.Args)
+			if executionErr != nil {
+				toolResult = map[string]any{"error": map[string]any{"message": executionErr.Error()}}
+			}
+			functionResponses = append(functionResponses, &genai.Part{
+				FunctionResponse: &genai.FunctionResponse{
+					ID:       functionCall.ID,
+					Name:     functionCall.Name,
+					Response: toolResult,
+				},
+			})
+		}
+		contents = append(contents, &genai.Content{Role: "user", Parts: functionResponses})
+
+		response, err = g.client.Models.GenerateContent(ctx, input.Model, contents, config)
+		if err != nil {
+			classifiedErr := ClassifyError("gemini", fmt.Errorf("failed to generate response after tool execution: %w", err))
+			return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
+		}
+	}
 }
 
 func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput) (<-chan StreamChunk, <-chan error) {
+	if len(g.ToolDeclarations) > 0 {
+		chunks := make(chan StreamChunk)
+		errs := make(chan error, 1)
+		go func() {
+			defer close(chunks)
+			defer close(errs)
+			response, _, err := g.Generate(ctx, input)
+			if err != nil {
+				errs <- err
+				return
+			}
+			select {
+			case chunks <- StreamChunk{
+				Delta:        response.Text,
+				InputTokens:  response.InputTokens,
+				OutputTokens: response.OutputTokens,
+				FinishReason: response.FinishReason,
+			}:
+			case <-ctx.Done():
+			}
+		}()
+		return chunks, errs
+	}
+
 	ctx, cancel := context.WithTimeout(
 		ctx,
 		30*time.Second,
@@ -132,9 +210,26 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 	return chunks, errs
 }
 
+func geminiFunctionCalls(content *genai.Content) []*genai.FunctionCall {
+	if content == nil {
+		return nil
+	}
+
+	functionCalls := make([]*genai.FunctionCall, 0)
+	for _, part := range content.Parts {
+		if part != nil && part.FunctionCall != nil {
+			functionCalls = append(functionCalls, part.FunctionCall)
+		}
+	}
+	return functionCalls
+}
+
 func geminiContents(input GenerateInput) []*genai.Content {
 	contents := make([]*genai.Content, 0, len(input.History)+1)
 	for _, message := range input.History {
+		if message.Content == "" {
+			continue
+		}
 		role := message.Role
 		if role == "assistant" {
 			role = "model"

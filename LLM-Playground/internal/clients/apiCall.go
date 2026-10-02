@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/bytedance/sonic"
 )
 
 type ApiInterface interface {
@@ -19,12 +17,12 @@ type OutboundCall struct {
 	url         string
 	method      string
 	queryParams map[string]string
-	bodyParams  map[string]any
+	bodyParams  []byte
 	headers     map[string]string
 	clients     *Clients
 }
 
-func NewOutboundCall(url string, method string, queryParams map[string]string, bodyParams map[string]any, headers map[string]string, clients *Clients) *OutboundCall {
+func NewOutboundCall(url string, method string, queryParams map[string]string, bodyParams []byte, headers map[string]string, clients *Clients) *OutboundCall {
 	return &OutboundCall{
 		url:         url,
 		method:      method,
@@ -64,11 +62,11 @@ func (ob *OutboundCall) ApiCall(ctx context.Context) ([]byte, error) {
 
 	var bodyReader io.Reader = http.NoBody
 	if len(ob.bodyParams) > 0 {
-		bodyBytes, err := sonic.Marshal(ob.bodyParams)
-		if err != nil {
-			return nil, err
-		}
-		bodyReader = bytes.NewBuffer(bodyBytes)
+		// bodyBytes, err := sonic.Marshal(ob.bodyParams)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		bodyReader = bytes.NewBuffer(ob.bodyParams)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, ob.method, finalURL, bodyReader)

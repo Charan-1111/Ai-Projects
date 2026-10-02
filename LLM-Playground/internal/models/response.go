@@ -37,3 +37,13 @@ type ToolDetails struct {
 	Description string         `json:"description"`
 	Parameters  map[string]any `json:"parameters"`
 }
+
+type ToolExecutionResponse struct {
+	Result map[string]any      `json:"result,omitempty"`
+	Error  *ToolExecutionError `json:"error,omitempty"`
+}
+
+type ToolExecutionError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
