@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"llm-playground/internal/chat"
+	"llm-playground/internal/clients"
 	"llm-playground/internal/config"
 	"llm-playground/internal/logging"
 	"llm-playground/internal/provider"
 	"llm-playground/internal/store/database"
+	"llm-playground/internal/tools"
 	"os"
 
 	"google.golang.org/genai"
@@ -21,6 +23,9 @@ type Application struct {
 	inMemoryChatService   *chat.InMemoryChatService
 	persistentChatService *chat.PersistentChatService
 	dbStore               database.Repository
+	clients               *clients.Clients
+	toolRegistry          *tools.ToolRegistry
+	apiFactory            clients.ApiFactory
 }
 
 func NewApplication() (*Application, error) {
@@ -65,6 +70,12 @@ func NewApplication() (*Application, error) {
 	// creating the persistent chat service
 	persistentChatService := chat.NewPersistentChatService(llmProvider, databaseStore)
 
+	httpClients := clients.NewClient()
+	defaultApiFactory := &clients.DefaultApiFactory{}
+
+	toolRegistry := tools.NewToolRegistry(httpClients, defaultApiFactory, config.Tools)
+	
+
 	return &Application{
 		log:                   log,
 		config:                config,
@@ -73,6 +84,9 @@ func NewApplication() (*Application, error) {
 		inMemoryChatService:   chatService,
 		persistentChatService: persistentChatService,
 		dbStore:               databaseStore,
+		clients:               httpClients,
+		toolRegistry:          toolRegistry,
+		apiFactory:            defaultApiFactory,
 	}, nil
 }
 
@@ -82,6 +96,14 @@ func (app *Application) StartServer() error {
 	if err != nil {
 		return fmt.Errorf("Error creating tables : %w", err)
 	}
+
+	// fetch the details of the tools...
+	app.toolRegistry.RegisterTools()
+	geminiProvider, ok := app.provider.(*provider.GeminiProvider)
+	if !ok {
+		return fmt.Errorf("configured provider does not support Gemini tool declarations")
+	}
+	geminiProvider.ToolDeclarations = app.toolRegistry.GeminiDeclarations()
 
 	appServer := app.SetupRoutes()
 

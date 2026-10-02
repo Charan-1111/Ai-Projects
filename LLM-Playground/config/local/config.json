@@ -53,5 +53,8 @@
             "conversation" : "INSERT INTO conversations (id, user_id) VALUES ($1, $1) ON CONFLICT (id) DO NOTHING",
             "message" : "INSERT INTO messages (id, conversation_id, role, content) VALUES ($1, $2, $3, $4)"
         }
+    },
+    "tools" : {
+        "get_current_time" : "http://localhost:8003/"
     }
 } 

@@ -9,7 +9,8 @@ import (
 )
 
 type GeminiProvider struct {
-	client *genai.Client
+	client           *genai.Client
+	ToolDeclarations []*genai.FunctionDeclaration
 }
 
 func NewGeminiProvider(client *genai.Client) *GeminiProvider {
@@ -27,6 +28,9 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 
 	config := &genai.GenerateContentConfig{
 		Temperature: genai.Ptr(float32(input.Temperature)),
+	}
+	if len(g.ToolDeclarations) > 0 {
+		config.Tools = []*genai.Tool{{FunctionDeclarations: g.ToolDeclarations}}
 	}
 	contents := geminiContents(input)
 
@@ -71,6 +75,9 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 
 	config := &genai.GenerateContentConfig{
 		Temperature: genai.Ptr(float32(input.Temperature)),
+	}
+	if len(g.ToolDeclarations) > 0 {
+		config.Tools = []*genai.Tool{{FunctionDeclarations: g.ToolDeclarations}}
 	}
 	contents := geminiContents(input)
 
