@@ -27,3 +27,13 @@ type Usage struct {
 	OutputTokens int64 `json:"output_tokens"`
 	TotalTokens  int64 `json:"total_tokens"`
 }
+
+type ToolResponse struct {
+	Tools []ToolDetails `json:"tools"`
+}
+
+type ToolDetails struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Parameters  map[string]any `json:"parameters"`
+}

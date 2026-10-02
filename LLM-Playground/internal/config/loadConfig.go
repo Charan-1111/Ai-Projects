@@ -14,6 +14,7 @@ type Configuration struct {
 	DefaultModel    string                        `json:"default_model"`
 	Retries         models.Retries                `json:"retries"`
 	Queries         models.Queries                `json:"queries"`
+	Tools           map[string]string             `json:"tools"`
 	once            sync.Once
 }
 

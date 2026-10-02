@@ -1,15 +1,26 @@
 package tools
 
+import "llm-playground/internal/clients"
+
 type RegisteredTool struct {
-	ToolName        string `json:"name"`
-	ToolDescription string `json:"description"`
-}
-type ToolRegistry struct {
-	ToolsByName map[string]RegisteredTool `json:"tools"`
+	ToolName        string
+	ToolDescription string
+	ToolParameters  map[string]any
+	ServiceUrl      string
 }
 
-func NewToolRegistry() *ToolRegistry {
+type ToolRegistry struct {
+	clients     *clients.Clients
+	apiFactory  clients.ApiFactory
+	tools       map[string]string
+	toolsByName map[string]RegisteredTool
+}
+
+func NewToolRegistry(clients *clients.Clients, apiFactory clients.ApiFactory, tools map[string]string) *ToolRegistry {
 	return &ToolRegistry{
-		ToolsByName: make(map[string]RegisteredTool),
+		clients:     clients,
+		apiFactory:  apiFactory,
+		tools:       tools,
+		toolsByName: make(map[string]RegisteredTool),
 	}
 }
