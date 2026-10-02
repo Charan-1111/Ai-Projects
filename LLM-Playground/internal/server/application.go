@@ -74,7 +74,6 @@ func NewApplication() (*Application, error) {
 	defaultApiFactory := &clients.DefaultApiFactory{}
 
 	toolRegistry := tools.NewToolRegistry(httpClients, defaultApiFactory, config.Tools)
-	
 
 	return &Application{
 		log:                   log,
@@ -103,7 +102,7 @@ func (app *Application) StartServer() error {
 	if !ok {
 		return fmt.Errorf("configured provider does not support Gemini tool declarations")
 	}
-	geminiProvider.ToolDeclarations = app.toolRegistry.GeminiDeclarations()
+	geminiProvider.ConfigureTools(app.toolRegistry.GeminiDeclarations(), app.toolRegistry)
 
 	appServer := app.SetupRoutes()
 

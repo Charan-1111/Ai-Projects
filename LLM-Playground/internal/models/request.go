@@ -1,5 +1,7 @@
 package models
 
+import "encoding/json"
+
 type PromptRequest struct {
 	Prompt          string  `json:"prompt"`
 	Model           string  `json:"model"`
@@ -7,4 +9,9 @@ type PromptRequest struct {
 	Temperature     float64 `json:"temperature"`
 	MaxOutputTokens int64   `json:"max_output_tokens"`
 	Stream          bool    `json:"stream"`
+}
+
+type ExecuteToolRequest struct {
+	ToolName  string          `json:"name"`
+	Arguments json.RawMessage `json:"arguments"`
 }

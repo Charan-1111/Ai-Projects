@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"llm-playground/internal/models"
+	"net/url"
 
 	"github.com/bytedance/sonic"
 )
@@ -12,7 +13,11 @@ func (tr *ToolRegistry) RegisterTools() {
 	// wg := &sync.WaitGroup{}
 
 	for _, toolUrl := range tr.tools {
-		finalUrl := toolUrl + "tools"
+		finalUrl, err := url.JoinPath(toolUrl, "tools")
+		if err != nil {
+			fmt.Printf("Error occurred while building tools URL for %s: %v\n", toolUrl, err)
+			continue
+		}
 
 		apiCall := tr.apiFactory.Create(finalUrl, "GET", nil, nil, nil, tr.clients)
 
