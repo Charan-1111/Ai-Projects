@@ -1,218 +1,94 @@
 # AI Projects
 
-A collection of small AI engineering projects built while learning how modern
-LLM applications work. The projects are independent Go services, each with its
-own `go.mod`, configuration, runtime dependencies, and API.
+This repository is a collection of Go-based AI experiments and learning projects built while exploring modern LLM workflows, vector search, document Q&A, and tool-calling patterns. Each project is designed to be run independently from its own directory.
 
-## Projects
+## Current Projects
 
 | Project | Purpose | Main concepts |
 | --- | --- | --- |
-| [LLM Playground](LLM-Playground/README.md) | Generate text with Gemini, stream responses, discover configured models, and maintain chat conversations. | LLM APIs, streaming, retries, timeouts, token usage, pricing, persistence |
-| [Semantic Search](Semantic-Search/README.md) | Create Gemini embeddings, compare text, store documents and chunks, and search with PostgreSQL/pgvector. | Embeddings, cosine similarity, chunking, vector databases, semantic search |
+| [LLM-Playground](LLM-Playground/) | Lightweight LLM service for text generation, chat, and streaming responses. | Gemini APIs, streaming, chat persistence, retry handling, configuration |
+| [Semantic-Search](Semantic-Search/) | Embedding and similarity search experiments with PostgreSQL and pgvector. | Embeddings, cosine similarity, chunking, vector search, database indexing |
+| [Ask-My-Documents](Ask-My-Documents/) | Document-grounded Q&A and retrieval experiments over local content. | Retrieval, document chunking, contextual prompting, question answering |
+| [Tool-Calling](Tool-Calling/) | Function/tool-calling prototypes for structured agent workflows. | Tool schemas, function orchestration, model/tool integration |
 
-The repository is a learning workspace rather than a single deployable
-application. Run each project from its own directory.
+The repository is a learning workspace rather than a single deployable application. Most projects are intentionally modular and can be developed, run, and debugged separately.
 
 ## Repository Layout
 
 ```text
 Ai-Projects/
-├── LLM-Playground/       # Gemini generation and conversation API
-├── Semantic-Search/      # Gemini embeddings and pgvector search API
-├── documentation/        # Learning notes, project status, and architecture notes
+├── Ask-My-Documents/      # Document-grounded Q&A experiments
+├── LLM-Playground/         # LLM generation and chat APIs
+├── Semantic-Search/        # Embedding and semantic search service
+├── Tool-Calling/           # Tool/function-calling examples
+├── documentation/          # Notes, architecture docs, and learning material
 ├── .gitignore
-└── README.md
+├── LICENSE
+├── README.md
+└── .github/
 ```
 
-## Common Requirements
+## Requirements
+
+Most projects in this repository use the following workflow:
 
 - Go 1.25 or later
-- PostgreSQL
+- PostgreSQL for services that store state or vector data
 - A Google Gemini API key
-- PowerShell, Bash, or another shell suitable for running Go commands
+- A local `.env` file in the project directory when required
+- PowerShell, Bash, or another shell for running Go commands
 
-Each service loads a `.env` file from its current working directory. Local
-environment files are ignored by Git. Create your own values; do not copy API
-keys or database passwords into tracked files.
+Each project keeps its own configuration and environment values locally. Do not commit API keys or database credentials.
 
-## Quick Start
+## Getting Started
+
+1. Clone the repository.
+2. Move into a project directory of interest.
+3. Download dependencies:
+
+```bash
+go mod download
+```
+
+4. Create a local `.env` file (if the project expects one) using the sample values from that project.
+5. Run the service or app from that folder with its project-specific entrypoint.
+
+Some projects include their own README or configuration notes inside their directory. For the most complete usage examples, inspect the project folder you want to run.
+
+## Project Notes
 
 ### LLM Playground
 
-The LLM Playground uses PostgreSQL for persistent chat conversations and
-listens on `http://localhost:8000`.
-
-```powershell
-cd LLM-Playground
-go mod download
-```
-
-Create `LLM-Playground/.env`:
-
-```dotenv
-LLM_PROVIDER_API_KEY=your-gemini-api-key
-DB_USERNAME=postgres
-DB_PASSWORD=your-database-password
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=llm_playground
-```
-
-Start the service:
-
-```powershell
-go run ./cmd/llm
-```
-
-Useful endpoints:
-
-- `GET /health`
-- `GET /v1/llm/models/available`
-- `POST /v1/llm/generate`
-- `POST /v1/llm/generate/stream`
-- `POST /v1/llm/chat`
-
-The streaming endpoint uses Server-Sent Events. Chat requests can use the
-`X-Session-Id` header to identify a conversation.
-
-See [LLM-Playground/README.md](LLM-Playground/README.md) for request examples,
-response formats, configuration details, and the persistence model.
+The LLM Playground is the most mature project in the repo and includes chat and generation APIs, environment configuration, and service startup examples.
 
 ### Semantic Search
 
-Semantic Search uses PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector)
-extension and listens on `http://localhost:8000` by default.
+Semantic Search focuses on vector embeddings, document chunking, PostgreSQL storage, and similarity search workflows using pgvector.
 
-```powershell
-cd Semantic-Search
-go mod download
-```
+### Ask My Documents
 
-Create `Semantic-Search/.env`:
+This project is aimed at document-grounded AI experiences, making it suitable for retrieval and question-answering experiments over local or uploaded content.
 
-```dotenv
-GEMINI_API_KEY=your-gemini-api-key
-DB_USERNAME=postgres
-DB_PASSWORD=your-database-password
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=semantic_search
-```
+### Tool Calling
 
-The database user must be able to create the `vector` extension and the
-application tables, or an administrator must install the extension first.
-
-Start the service:
-
-```powershell
-go run ./cmd/llm
-```
-
-Useful endpoints:
-
-- `GET /health`
-- `POST /semantic/embed`
-- `POST /semantic/compare`
-- `POST /semantic/search`
-- `POST /semantic/document/inject`
-- `POST /semantic/document/inject/multiple`
-- `PUT /semantic/document/:docId`
-- `DELETE /semantic/document/:docId`
-- `POST /semantic/chunks/upload/document`
-- `POST /semantic/chunks/search`
-
-The current indexing flow is synchronous: document embedding, word chunking,
-chunk embedding, and database writes happen during the HTTP request. See
-[Semantic-Search/README.md](Semantic-Search/README.md) for API payloads, schema
-details, and current limitations.
-
-## Configuration
-
-Both services read `config/local/config.json` by default. Set
-`CONFIG_FILE_PATH` to load a different configuration file:
-
-```powershell
-$env:CONFIG_FILE_PATH = "config/local/config.json"
-go run ./cmd/llm
-```
-
-Configuration currently includes model definitions, retry values, SQL queries,
-and service-specific settings. The files under `config/local/` are development
-configuration, not production deployment manifests.
-
-Important service differences:
-
-- `LLM-Playground` currently listens on a hard-coded `:8000` address.
-- `Semantic-Search` uses the JSON `port` setting and defaults to `:8000`.
-- The Semantic Search provider currently uses the `gemini-embedding-001` model
-	and 1536-dimensional vectors directly in code.
-
-## Architecture At A Glance
-
-```text
-Client
-	|
-	+--> LLM Playground --> Gemini generation API
-	|          |
-	|          +--> PostgreSQL conversation history
-	|
-	+--> Semantic Search --> Gemini embedding API
-						 |
-						 +--> PostgreSQL + pgvector
-										+--> documents
-										+--> chunks
-```
-
-Both services use Fiber for HTTP routing, `pgx` for PostgreSQL access, and
-request IDs for tracing responses. CORS is currently permissive and neither
-service provides authentication or authorization.
+This project explores function and tool calling patterns, where an LLM can decide when to invoke external tools or structured operations.
 
 ## Development Checks
 
-Run formatting, compilation, and tests from each project directory:
+Run formatting and basic validation from each project directory when working on an individual service:
 
-```powershell
+```bash
 gofmt -w .
 go test ./...
 go vet ./...
 ```
 
-There are currently no automated tests in the repository, so a successful
-build does not replace API-level verification against a configured Gemini key
-and database.
+There are currently no repository-wide automated tests, so practical verification should include running the relevant service and validating its output against your configured API keys and databases.
 
 ## Documentation
 
-- [Project structure notes](documentation/project-structure.md)
-- [First-cut feature status](documentation/first-cut-feature-status.md)
-- [Semantic Search learning roadmap](documentation/semantic-search.md)
-- [Semantic Search indexing architecture](Semantic-Search/docs/indexing-architecture.md)
+The `documentation/` folder contains notes, architecture summaries, and planning material related to the projects in this repository.
 
-Some documentation describes planned learning milestones rather than shipped
-behavior. The per-project READMEs are the most direct references for running
-the current implementations.
+## License
 
-## Current Limitations
-
-- No authentication, authorization, or production deployment configuration.
-- CORS allows all origins.
-- No automated unit or integration test suite.
-- Database schema and SQL are configuration-driven rather than managed by a
-	migration tool.
-- Semantic Search indexing is synchronous and sends one embedding request per
-	chunk; background workers and batch embedding are planned, not implemented.
-- Model names and pricing in local JSON configuration should be verified before
-	using the services against a live provider account.
-
-## Learning Direction
-
-The projects progress from direct LLM integration to retrieval foundations:
-
-```text
-Gemini generation
-		-> streaming, retries, usage, cost, conversations
-		-> embeddings and similarity
-		-> chunking and vector search
-		-> background indexing and RAG evaluation
-```
+This repository is licensed under the MIT License. See [LICENSE](LICENSE) for details.
