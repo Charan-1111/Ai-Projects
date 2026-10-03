@@ -4,6 +4,7 @@ import "llm-playground/internal/models"
 
 type GenerateInput struct {
 	SystemPrompt    string
+	RequiredTools   []string
 	Prompt          string
 	History         []Message
 	Model           string
@@ -38,6 +39,8 @@ type GeneratorService struct {
 func BuildGenerateInput(modelConfig models.ModelConfig, request *models.PromptRequest) (GenerateInput, error) {
 	input := GenerateInput{}
 	input.MaxOutputTokens = modelConfig.MaxOutputTokens
+	input.SystemPrompt = modelConfig.SystemInstructions
+	input.RequiredTools = append([]string(nil), modelConfig.RequiredTools...)
 	input.Model = modelConfig.ProviderModel
 	input.Prompt = request.Prompt
 	input.Temperature = request.Temperature

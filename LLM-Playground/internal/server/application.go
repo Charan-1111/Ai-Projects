@@ -98,11 +98,23 @@ func (app *Application) StartServer() error {
 
 	// fetch the details of the tools...
 	app.toolRegistry.RegisterTools()
+	registeredToolNames := make(map[string]struct{})
+	declarations := app.toolRegistry.GeminiDeclarations()
+	for _, declaration := range declarations {
+		registeredToolNames[declaration.Name] = struct{}{}
+	}
+	for modelID, modelConfig := range app.config.AvailableModels {
+		for _, requiredTool := range modelConfig.RequiredTools {
+			if _, exists := registeredToolNames[requiredTool]; !exists {
+				return fmt.Errorf("model %q requires tool %q, but it was not registered", modelID, requiredTool)
+			}
+		}
+	}
 	geminiProvider, ok := app.provider.(*provider.GeminiProvider)
 	if !ok {
 		return fmt.Errorf("configured provider does not support Gemini tool declarations")
 	}
-	geminiProvider.ConfigureTools(app.toolRegistry.GeminiDeclarations(), app.toolRegistry)
+	geminiProvider.ConfigureTools(declarations, app.toolRegistry)
 
 	appServer := app.SetupRoutes()
 
