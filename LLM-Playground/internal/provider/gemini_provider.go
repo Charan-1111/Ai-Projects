@@ -32,17 +32,8 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 	)
 	defer cancel()
 
-	config := &genai.GenerateContentConfig{
-		Temperature: genai.Ptr(float32(input.Temperature)),
-	}
-	if len(g.ToolDeclarations) > 0 {
-		config.Tools = []*genai.Tool{{FunctionDeclarations: g.ToolDeclarations}}
-	}
+	config := geminiGenerateConfig(input, g.ToolDeclarations)
 	contents := geminiContents(input)
-
-	if input.MaxOutputTokens > 0 {
-		config.MaxOutputTokens = int32(input.MaxOutputTokens)
-	}
 
 	response, err := g.client.Models.GenerateContent(
 		ctx,
@@ -98,7 +89,8 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 		for _, functionCall := range functionCalls {
 			toolResult, executionErr := g.toolExecutor.ToolExecution(ctx, functionCall.Name, functionCall.Args)
 			if executionErr != nil {
-				toolResult = map[string]any{"error": map[string]any{"message": executionErr.Error()}}
+				classifiedErr := ClassifyError("tool", fmt.Errorf("execute tool %q: %w", functionCall.Name, executionErr))
+				return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
 			}
 			functionResponses = append(functionResponses, &genai.Part{
 				FunctionResponse: &genai.FunctionResponse{
@@ -151,17 +143,8 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 	chunks := make(chan StreamChunk)
 	errs := make(chan error, 1)
 
-	config := &genai.GenerateContentConfig{
-		Temperature: genai.Ptr(float32(input.Temperature)),
-	}
-	if len(g.ToolDeclarations) > 0 {
-		config.Tools = []*genai.Tool{{FunctionDeclarations: g.ToolDeclarations}}
-	}
+	config := geminiGenerateConfig(input, g.ToolDeclarations)
 	contents := geminiContents(input)
-
-	if input.MaxOutputTokens > 0 {
-		config.MaxOutputTokens = int32(input.MaxOutputTokens)
-	}
 
 	go func() {
 		defer cancel()
@@ -245,4 +228,32 @@ func geminiContents(input GenerateInput) []*genai.Content {
 	}
 
 	return contents
+}
+
+func geminiGenerateConfig(input GenerateInput, declarations []*genai.FunctionDeclaration) *genai.GenerateContentConfig {
+	config := &genai.GenerateContentConfig{
+		Temperature: genai.Ptr(float32(input.Temperature)),
+	}
+
+	if input.SystemPrompt != "" {
+		config.SystemInstruction = &genai.Content{
+			Parts: []*genai.Part{{Text: input.SystemPrompt}},
+		}
+	}
+	if len(declarations) > 0 {
+		config.Tools = []*genai.Tool{{FunctionDeclarations: declarations}}
+	}
+	if input.MaxOutputTokens > 0 {
+		config.MaxOutputTokens = int32(input.MaxOutputTokens)
+	}
+	if len(input.RequiredTools) > 0 {
+		config.ToolConfig = &genai.ToolConfig{
+			FunctionCallingConfig: &genai.FunctionCallingConfig{
+				Mode:                 genai.FunctionCallingConfigModeAny,
+				AllowedFunctionNames: append([]string(nil), input.RequiredTools...),
+			},
+		}
+	}
+
+	return config
 }
