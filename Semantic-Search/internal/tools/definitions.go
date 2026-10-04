@@ -3,7 +3,7 @@ package tools
 func SearchDocumentsDefinition() ToolDefinition {
 	return ToolDefinition{
 		Name:        "search_documents",
-		Description: "Search the vector database for semantically relevant documents based on a natural-language query.",
+		Description: "Search the application's indexed documents for information relevant to the user's question. The collection covers multiple topics and its contents can change. For informational questions that may be answered by documents, search before answering rather than assuming the collection lacks relevant information. Returns matching content; results may be empty or irrelevant.",
 		Parameters: map[string]any{
 			"type": "object",
 			"properties": map[string]any{

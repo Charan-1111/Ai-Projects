@@ -11,7 +11,7 @@ import (
 type Configuration struct {
 	Env                     string                        `json:"env"`
 	AvailableModels         map[string]models.ModelConfig `json:"available_models"`
-	GlobalSystemInstruction string                        `json:"global_system_instructionW"`
+	GlobalSystemInstruction string                        `json:"global_system_instruction"`
 	DefaultModel            string                        `json:"default_model"`
 	Retries                 models.Retries                `json:"retries"`
 	Queries                 models.Queries                `json:"queries"`
