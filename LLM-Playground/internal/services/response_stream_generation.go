@@ -24,7 +24,7 @@ func (s *Services) ResponseStreamGeneration(ctx context.Context, request *models
 		return nil, nil, fmt.Errorf("invalid retry configuration")
 	}
 
-	input, _ := provider.BuildGenerateInput(modelConfig, request)
+	input, _ := provider.BuildGenerateInput(modelConfig, request, s.config.GlobalSystemInstruction)
 
 	outChunks := make(chan provider.StreamChunk)
 	outErrs := make(chan error, 1)
