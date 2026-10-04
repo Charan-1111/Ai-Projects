@@ -45,7 +45,7 @@ func BuildGenerateInput(modelConfig models.ModelConfig, request *models.PromptRe
 
 	input := GenerateInput{}
 	input.MaxOutputTokens = modelConfig.MaxOutputTokens
-	input.SystemPrompt = modelConfig.SystemInstructions
+	input.SystemPrompt = systemPrompt
 	input.RequiredTools = append([]string(nil), modelConfig.RequiredTools...)
 	input.Model = modelConfig.ProviderModel
 	input.Prompt = request.Prompt
