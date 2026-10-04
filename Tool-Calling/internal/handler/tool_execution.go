@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"fmt"
 	"tool-calling/internal/tools"
 
 	"github.com/gofiber/fiber/v3"
 )
 
 func (h *Handler) ExecuteTool(c fiber.Ctx) error {
+	fmt.Println("Tool execution")
 	var req tools.ExecuteToolRequest
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(tools.ToolExecutionResponse{

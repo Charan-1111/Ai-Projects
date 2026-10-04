@@ -13,7 +13,7 @@ func (s *Services) Chat(ctx context.Context, requestId, conversationId string, r
 		return nil, fmt.Errorf("model configuration not found for request model %q and model_id %q", request.Model, request.ModelId)
 	}
 
-	input, _ := provider.BuildGenerateInput(modelConfig, request)
+	input, _ := provider.BuildGenerateInput(modelConfig, request, s.config.GlobalSystemInstruction)
 
 	// return s.inMemoryChatService.Chat(ctx, requestId, conversationId, input)
 	return s.persistentChatService.Chat(ctx, requestId, conversationId, input)

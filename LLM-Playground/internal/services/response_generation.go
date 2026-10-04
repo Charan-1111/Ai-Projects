@@ -24,7 +24,7 @@ func (s *Services) ResponseGeneration(ctx context.Context, requestId string, req
 		return models.ModelResponse{}, fmt.Errorf("invalid retry configuration")
 	}
 
-	input, _ := provider.BuildGenerateInput(modelConfig, request)
+	input, _ := provider.BuildGenerateInput(modelConfig, request, s.config.GlobalSystemInstruction)
 
 	var (
 		response   *provider.GenerateResponse

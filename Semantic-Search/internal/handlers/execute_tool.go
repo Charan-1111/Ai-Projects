@@ -7,6 +7,7 @@ import (
 )
 
 func (h *Handlers) ExecuteTools(c fiber.Ctx) error {
+	h.log.Log.Info().Msg("Semantic Tool execution")
 	var toolReq tools.ExecuteToolRequest
 	if err := c.Bind().Body(&toolReq); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "Invalid request body"})

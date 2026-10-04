@@ -36,7 +36,13 @@ type GeneratorService struct {
 	provider LLMProvider
 }
 
-func BuildGenerateInput(modelConfig models.ModelConfig, request *models.PromptRequest) (GenerateInput, error) {
+func BuildGenerateInput(modelConfig models.ModelConfig, request *models.PromptRequest, globalInstructions string) (GenerateInput, error) {
+	systemPrompt := globalInstructions
+
+	if modelConfig.SystemInstructions != "" {
+		systemPrompt += "\n\n" + modelConfig.SystemInstructions
+	}
+
 	input := GenerateInput{}
 	input.MaxOutputTokens = modelConfig.MaxOutputTokens
 	input.SystemPrompt = modelConfig.SystemInstructions
