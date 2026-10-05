@@ -82,6 +82,7 @@ func (s *Services) ResponseGeneration(ctx context.Context, requestId string, req
 		Usage:             usage,
 		EstimatedCostUsed: totalCost,
 		FinishReason:      response.FinishReason,
+		ToolCalls:         response.ToolCalls,
 		LatencyMs:         latencyMs,
 	}
 

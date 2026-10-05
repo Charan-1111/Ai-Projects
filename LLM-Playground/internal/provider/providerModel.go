@@ -18,11 +18,12 @@ type Message struct {
 }
 
 type GenerateResponse struct {
-	Text         string `json:"text"`
-	InputTokens  int64  `json:"input_tokens"`
-	OutputTokens int64  `json:"output_tokens"`
-	TotalTokens  int64  `json:"total_tokens"`
-	FinishReason string `json:"finish_reason"`
+	Text         string            `json:"text"`
+	InputTokens  int64             `json:"input_tokens"`
+	OutputTokens int64             `json:"output_tokens"`
+	TotalTokens  int64             `json:"total_tokens"`
+	FinishReason string            `json:"finish_reason"`
+	ToolCalls    []models.ToolCall `json:"tool_calls"`
 }
 
 type StreamChunk struct {
@@ -30,6 +31,7 @@ type StreamChunk struct {
 	InputTokens  int64
 	OutputTokens int64
 	FinishReason string
+	ToolCalls    []models.ToolCall
 }
 
 type GeneratorService struct {

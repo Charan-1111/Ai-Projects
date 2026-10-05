@@ -42,6 +42,7 @@ func (h *Handlers) GenerateStreamResponse(c fiber.Ctx, stream *sse.Stream) error
 					"input_tokens":  chunk.InputTokens,
 					"output_tokens": chunk.OutputTokens,
 					"finish_reason": chunk.FinishReason,
+					"tool_calls":    chunk.ToolCalls,
 				},
 			}); evErr != nil {
 				return evErr
