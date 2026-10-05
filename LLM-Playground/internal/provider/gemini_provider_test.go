@@ -2,6 +2,8 @@ package provider
 
 import (
 	"testing"
+
+	"google.golang.org/genai"
 )
 
 func TestGeminiContentsSkipsEmptyHistoryMessages(t *testing.T) {
@@ -25,5 +27,22 @@ func TestGeminiContentsSkipsEmptyHistoryMessages(t *testing.T) {
 				t.Fatalf("content %d part %d is empty", index, partIndex)
 			}
 		}
+	}
+}
+
+func TestGeminiFunctionCallsCollectsEveryCall(t *testing.T) {
+	content := &genai.Content{
+		Parts: []*genai.Part{
+			{FunctionCall: &genai.FunctionCall{Name: "get_current_time"}},
+			{FunctionCall: &genai.FunctionCall{Name: "search_goroutines"}},
+		},
+	}
+
+	calls := geminiFunctionCalls(content)
+	if len(calls) != 2 {
+		t.Fatalf("expected two function calls, got %d", len(calls))
+	}
+	if calls[0].Name != "get_current_time" || calls[1].Name != "search_goroutines" {
+		t.Fatalf("unexpected function calls: %q, %q", calls[0].Name, calls[1].Name)
 	}
 }

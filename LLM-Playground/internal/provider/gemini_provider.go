@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"llm-playground/internal/models"
 	"time"
 
 	"google.golang.org/genai"
@@ -49,6 +50,8 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 
 	var inputTokens, outputTokens, totalTokens int64
 	const maxToolCallRounds = 8
+	toolCalls := make([]models.ToolCall, 0)
+
 	for round := 0; ; round++ {
 		if response == nil || len(response.Candidates) == 0 {
 			classifiedErr := ClassifyError("gemini", fmt.Errorf("response generation error: no candidates returned"))
@@ -69,6 +72,7 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 				OutputTokens: outputTokens,
 				TotalTokens:  totalTokens,
 				FinishReason: string(candidate.FinishReason),
+				ToolCalls:    toolCalls,
 			}, 200, nil
 		}
 		if round >= maxToolCallRounds {
@@ -87,7 +91,11 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 		contents = append(contents, candidate.Content)
 		functionResponses := make([]*genai.Part, 0, len(functionCalls))
 		for _, functionCall := range functionCalls {
+			toolExecutionStart := time.Now()
+
 			toolResult, executionErr := g.toolExecutor.ToolExecution(ctx, functionCall.Name, functionCall.Args)
+			toolExecutionDuration := time.Since(toolExecutionStart).Milliseconds()
+
 			if executionErr != nil {
 				classifiedErr := ClassifyError("tool", fmt.Errorf("execute tool %q: %w", functionCall.Name, executionErr))
 				return &GenerateResponse{}, classifiedErr.StatusCode, classifiedErr
@@ -98,6 +106,12 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 					Name:     functionCall.Name,
 					Response: toolResult,
 				},
+			})
+			toolCalls = append(toolCalls, models.ToolCall{
+				Name:      functionCall.Name,
+				Arguments: functionCall.Args,
+				Duration:  int32(toolExecutionDuration),
+				Status:    "success",
 			})
 		}
 		contents = append(contents, &genai.Content{Role: "user", Parts: functionResponses})
@@ -128,6 +142,7 @@ func (g *GeminiProvider) GenerateStream(ctx context.Context, input GenerateInput
 				InputTokens:  response.InputTokens,
 				OutputTokens: response.OutputTokens,
 				FinishReason: response.FinishReason,
+				ToolCalls:    response.ToolCalls,
 			}:
 			case <-ctx.Done():
 			}
