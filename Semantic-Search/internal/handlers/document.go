@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"semantic-search/internal/models"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/jackc/pgx/v5"
 )
 
 func (h *Handlers) InjectDocument(c fiber.Ctx) error {
@@ -64,4 +66,21 @@ func (h *Handlers) DeleteDocument(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Document deleted successfully"})
+}
+
+func (h *Handlers) FetchDocument(c fiber.Ctx) error {
+	documentId := c.Query("docId")
+	if documentId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"code": 1, "message": "Document Id is required"})
+	}
+
+	document, err := h.service.FetchDocument(c.Context(), documentId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) || document.DocId == "" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"code": 1, "message": "Document not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"code": 1, "message": "Something went wrong"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"code": 0, "message": "Document fetched successfully", "content": document})
 }

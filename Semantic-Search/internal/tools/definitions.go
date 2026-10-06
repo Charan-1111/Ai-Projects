@@ -39,3 +39,21 @@ func SearchDocumentsDefinition() ToolDefinition {
 		},
 	}
 }
+
+func FetchDocumentDefinition() ToolDefinition {
+	return ToolDefinition{
+		Name: "get_document",
+		Description: "Retrieve a single indexed document by its unique document ID. Use this when the user asks for a specific document or wants the full contents of a known record.",
+		Parameters: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"docId": map[string]any{
+					"type":        "string",
+					"description": "The unique document identifier to fetch from the database.",
+				},
+			},
+			"required":             []string{"docId"},
+			"additionalProperties": false,
+		},
+	}
+}

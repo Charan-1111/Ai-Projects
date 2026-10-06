@@ -13,6 +13,7 @@ type Fetch struct {
 	SimilarDocuments       string `json:"similar_documents"`
 	ChunkedDocuments       string `json:"chunked_documents"`
 	FilterChunkedDocuments string `json:"filter_chunked_documents"`
+	FetchDocumentsById     string `json:"fetch_documents_by_id"`
 }
 
 type Save struct {

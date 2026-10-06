@@ -38,7 +38,7 @@ func (app *Application) SetupRoutes() *fiber.App {
 	docGroup.Post("/inject/multiple", appHandlers.MultiDocumentUpload)
 	docGroup.Put("/:docId", appHandlers.UpdateDocument)
 	docGroup.Delete("/:docId", appHandlers.DeleteDocument)
-
+	docGroup.Get("/fetch/byId", appHandlers.FetchDocument)
 
 	chunkGroup := apiGroup.Group("/chunks")
 	chunkGroup.Post("/upload/document", appHandlers.UploadDocuments)
