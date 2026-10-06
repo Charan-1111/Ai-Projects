@@ -29,6 +29,10 @@ type SearchRequest struct {
 	MinimumScore float32 `json:"minimumScore"`
 }
 
+type FetchDocument struct {
+	DocId string `json:"docId"`
+}
+
 type Filters struct {
 	Category   string `json:"category"`
 	Difficulty string `json:"difficulty"`

@@ -10,7 +10,6 @@ import (
 )
 
 func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest) (tools.ToolExecutionResponse, error) {
-	fmt.Println("call came here")
 	switch req.ToolName {
 	case "search_documents":
 		var args models.SearchRequest
@@ -24,6 +23,28 @@ func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest
 		}
 
 		resultBytes, err := sonic.Marshal(documentsResponse)
+		if err != nil {
+			return tools.ToolExecutionResponse{}, err
+		}
+
+		var result map[string]any
+		if err := sonic.Unmarshal(resultBytes, &result); err != nil {
+			return tools.ToolExecutionResponse{}, err
+		}
+
+		return tools.ToolExecutionResponse{Result: result}, nil
+	case "get_document":
+		var args models.FetchDocument
+		if err := sonic.Unmarshal(req.Arguments, &args); err != nil {
+			return tools.ToolExecutionResponse{}, err
+		}
+
+		document, err := s.FetchDocument(ctx, args.DocId)
+		if err != nil {
+			return tools.ToolExecutionResponse{}, err
+		}
+
+		resultBytes, err := sonic.Marshal(document)
 		if err != nil {
 			return tools.ToolExecutionResponse{}, err
 		}
