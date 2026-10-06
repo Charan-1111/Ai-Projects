@@ -97,3 +97,11 @@ func (s *Service) UpdateDocument(ctx context.Context, docID string, reqBody mode
 func (s *Service) DeleteDocument(ctx context.Context, docID string) (bool, error) {
 	return s.dbStore.DeleteDocument(ctx, docID)
 }
+
+func (s *Service) FetchDocument(ctx context.Context, docId string) (models.Document, error) {
+	document, err := s.dbStore.FetchDocument(ctx, docId)
+	if err != nil {
+		return models.Document{}, err
+	}
+	return document, nil
+}

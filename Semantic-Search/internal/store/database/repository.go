@@ -19,6 +19,7 @@ type Repository interface {
 	UploadChunks(ctx context.Context, chunks []chunks.Chunks) error
 	SearchChunkedDocuments(ctx context.Context, embedding []float32, limit int, minScore float32) ([]models.ChunkDetails, error)
 	SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int, minScore float32) ([]models.ChunkDetails, error)
+	FetchDocument(ctx context.Context, docId string) (models.Document, error)
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
@@ -220,4 +221,22 @@ func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, emb
 	}
 
 	return chunkDetails, nil
+}
+
+func (db *DataBaseStore) FetchDocument(ctx context.Context, docId string) (models.Document, error) {
+	var document models.Document
+
+	err := db.Db.QueryRow(ctx, db.Queries.Fetch.FetchDocumentsById, docId).Scan(
+		&document.DocId,
+		&document.DocTitle,
+		&document.DocContent,
+		&document.DocCategory,
+		&document.DocSource,
+		&document.MetaData,
+	)
+	if err != nil {
+		return models.Document{}, err
+	}
+
+	return document, nil
 }
