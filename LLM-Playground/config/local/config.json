@@ -57,7 +57,9 @@
         }
     },
     "tools" : {
-        "get_current_time" : "http://localhost:8003/",
         "search_documents" : "http://localhost:8001/"
+    },
+    "mcp-servers" : {
+        "time-service" : "http://localhost:8003/mcp"
     }
 } 
