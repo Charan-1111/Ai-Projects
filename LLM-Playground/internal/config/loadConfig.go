@@ -16,6 +16,7 @@ type Configuration struct {
 	Retries                 models.Retries                `json:"retries"`
 	Queries                 models.Queries                `json:"queries"`
 	Tools                   map[string]string             `json:"tools"`
+	McpServers              map[string]string             `json:"mcp-servers"`
 	once                    sync.Once
 }
 
