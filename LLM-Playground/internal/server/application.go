@@ -11,6 +11,7 @@ import (
 	"llm-playground/internal/store/database"
 	"llm-playground/internal/tools"
 	"os"
+	"time"
 
 	"google.golang.org/genai"
 )
@@ -25,6 +26,7 @@ type Application struct {
 	dbStore               database.Repository
 	clients               *clients.Clients
 	toolRegistry          *tools.ToolRegistry
+	mcpRegistry           *tools.MCPRegistry
 	apiFactory            clients.ApiFactory
 }
 
@@ -75,6 +77,8 @@ func NewApplication() (*Application, error) {
 
 	toolRegistry := tools.NewToolRegistry(httpClients, defaultApiFactory, config.Tools)
 
+	mcpRegistry := tools.NewMCPRegistry()
+
 	return &Application{
 		log:                   log,
 		config:                config,
@@ -85,6 +89,7 @@ func NewApplication() (*Application, error) {
 		dbStore:               databaseStore,
 		clients:               httpClients,
 		toolRegistry:          toolRegistry,
+		mcpRegistry:           mcpRegistry,
 		apiFactory:            defaultApiFactory,
 	}, nil
 }
@@ -115,6 +120,26 @@ func (app *Application) StartServer() error {
 		return fmt.Errorf("configured provider does not support Gemini tool declarations")
 	}
 	geminiProvider.ConfigureTools(declarations, app.toolRegistry)
+
+	// registering mcp tools
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+
+	// registering all the tools
+	var mcpError error
+	for mcpServerName, serverLink := range app.config.McpServers {
+		err := app.mcpRegistry.Connect(ctx, mcpServerName, serverLink)
+		if err != nil {
+			app.mcpRegistry.Close()
+			mcpError = err
+			break
+		}
+	}
+	cancel()
+	if mcpError != nil {
+		return mcpError
+	}
+	geminiProvider.ConfigureTools(app.mcpRegistry.GeminiDeclarations(), app.mcpRegistry)
 
 	appServer := app.SetupRoutes()
 
