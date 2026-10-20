@@ -1,27 +1,36 @@
 # AI Projects
 
-This repository is a collection of Go-based AI experiments and learning projects built while exploring modern LLM workflows, vector search, document Q&A, and tool-calling patterns. Each project is designed to be run independently from its own directory.
+This repository contains a set of Go-based experiments focused on practical AI application patterns: LLM integration, document-grounded Q&A, semantic search, and tool calling. Each project is intentionally self-contained so it can be developed, run, and tested independently.
 
-## Current Projects
+## Overview
 
-| Project | Purpose | Main concepts |
+The goal of this workspace is to explore building AI features with a hands-on, iterative approach. The projects here cover:
+
+- LLM APIs and chat workflows
+- Prompt-driven generation and streaming responses
+- Semantic retrieval and embedding pipelines
+- Vector search with PostgreSQL/pgvector
+- Agent-like tool execution patterns
+- Retrieval-augmented document Q&A
+
+## Included projects
+
+| Project | Focus | Main technologies |
 | --- | --- | --- |
-| [LLM-Playground](LLM-Playground/) | Lightweight LLM service for text generation, chat, and streaming responses. | Gemini APIs, streaming, chat persistence, retry handling, configuration |
-| [Semantic-Search](Semantic-Search/) | Embedding and similarity search experiments with PostgreSQL and pgvector. | Embeddings, cosine similarity, chunking, vector search, database indexing |
-| [Ask-My-Documents](Ask-My-Documents/) | Document-grounded Q&A and retrieval experiments over local content. | Retrieval, document chunking, contextual prompting, question answering |
-| [Tool-Calling](Tool-Calling/) | Function/tool-calling prototypes for structured agent workflows. | Tool schemas, function orchestration, model/tool integration |
+| [LLM-Playground](LLM-Playground/) | LLM generation, chat APIs, and service orchestration | Go HTTP services, Gemini providers, streaming responses, config-driven setup |
+| [Semantic-Search](Semantic-Search/) | Embeddings, chunking, semantic similarity, and vector storage | Go, PostgreSQL, pgvector, cosine similarity, document indexing |
+| [Ask-My-Documents](Ask-My-Documents/) | Document-centric Q&A and retrieval over local content | Retrieval workflow, context assembly, LLM prompting, document processing |
+| [Tool-Calling](Tool-Calling/) | Function/tool-calling experiments for structured AI workflows | Tool registration, model-tool orchestration, request/response handling |
 
-The repository is a learning workspace rather than a single deployable application. Most projects are intentionally modular and can be developed, run, and debugged separately.
-
-## Repository Layout
+## Repository structure
 
 ```text
 Ai-Projects/
-├── Ask-My-Documents/      # Document-grounded Q&A experiments
-├── LLM-Playground/         # LLM generation and chat APIs
-├── Semantic-Search/        # Embedding and semantic search service
-├── Tool-Calling/           # Tool/function-calling examples
-├── documentation/          # Notes, architecture docs, and learning material
+├── Ask-My-Documents/      # Document-grounded RAG experiments
+├── LLM-Playground/         # Chat and generation service examples
+├── Semantic-Search/        # Embedding and similarity search service
+├── Tool-Calling/           # Tool/function-calling prototypes
+├── documentation/          # Notes, system docs, project planning docs
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -30,52 +39,55 @@ Ai-Projects/
 
 ## Requirements
 
-Most projects in this repository use the following workflow:
+Most projects rely on a similar local setup:
 
 - Go 1.25 or later
-- PostgreSQL for services that store state or vector data
-- A Google Gemini API key
-- A local `.env` file in the project directory when required
-- PowerShell, Bash, or another shell for running Go commands
+- PostgreSQL for vector or stateful services
+- A valid Google Gemini API key
+- Local project configuration values (often in `.env` or `config/*.json`)
+- Shell access for running Go commands and service startup scripts
 
-Each project keeps its own configuration and environment values locally. Do not commit API keys or database credentials.
+Do not commit API keys, database credentials, or other secret materials.
 
-## Getting Started
+## Getting started
 
 1. Clone the repository.
-2. Move into a project directory of interest.
+2. Open the project you want to explore.
 3. Download dependencies:
 
 ```bash
 go mod download
 ```
 
-4. Create a local `.env` file (if the project expects one) using the sample values from that project.
-5. Run the service or app from that folder with its project-specific entrypoint.
+4. Create the required local configuration values for that project.
+5. Run the service from that project directory with its project-specific entrypoint.
 
-Some projects include their own README or configuration notes inside their directory. For the most complete usage examples, inspect the project folder you want to run.
+Example pattern:
 
-## Project Notes
+```bash
+cd LLM-Playground
+go mod download
+go run ./cmd/llm
+```
 
-### LLM Playground
+If a project has its own README, follow that file for environment variables and API usage; it is usually the most accurate source for local setup.
 
-The LLM Playground is the most mature project in the repo and includes chat and generation APIs, environment configuration, and service startup examples.
+## Suggested project order
 
-### Semantic Search
+If you are exploring the repo from scratch, this is a sensible order:
 
-Semantic Search focuses on vector embeddings, document chunking, PostgreSQL storage, and similarity search workflows using pgvector.
+1. [LLM-Playground](LLM-Playground/) — understand API and model integration basics.
+2. [Semantic-Search](Semantic-Search/) — learn embeddings, vectors, and retrieval patterns.
+3. [Ask-My-Documents](Ask-My-Documents/) — see document-grounded Q&A in practice.
+4. [Tool-Calling](Tool-Calling/) — extend the system into agent/tool orchestration.
 
-### Ask My Documents
+## Documentation
 
-This project is aimed at document-grounded AI experiences, making it suitable for retrieval and question-answering experiments over local or uploaded content.
+The [documentation/](documentation/) folder contains notes, architecture discussions, feature status, and planning material for the workspace. These docs are useful for understanding the intended direction of the projects and the broader system design.
 
-### Tool Calling
+## Development checks
 
-This project explores function and tool calling patterns, where an LLM can decide when to invoke external tools or structured operations.
-
-## Development Checks
-
-Run formatting and basic validation from each project directory when working on an individual service:
+From an individual project directory, a typical validation flow is:
 
 ```bash
 gofmt -w .
@@ -83,11 +95,7 @@ go test ./...
 go vet ./...
 ```
 
-There are currently no repository-wide automated tests, so practical verification should include running the relevant service and validating its output against your configured API keys and databases.
-
-## Documentation
-
-The `documentation/` folder contains notes, architecture summaries, and planning material related to the projects in this repository.
+This repository is primarily an experimental workspace, so validation is usually project-specific and should be paired with direct runtime checks against the configured API keys and dependencies.
 
 ## License
 
