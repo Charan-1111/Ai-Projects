@@ -83,7 +83,7 @@ If you are exploring the repo from scratch, this is a sensible order:
 
 ## Documentation
 
-The [documentation/](documentation/) folder contains notes, architecture discussions, feature status, and planning material for the workspace. These docs are useful for understanding the intended direction of the projects and the broader system design.
+The [architecture diagram](documentation/architecture.md) shows how the four services and their data stores and model/tool integrations fit together. The [documentation/](documentation/) folder also contains notes, feature status, and planning material for the workspace.
 
 ## Development checks
 
