@@ -1,0 +1,270 @@
+{
+  "info": {
+    "_postman_id": "db1e5837-13b5-4efb-b81c-53d114b1a4fb",
+    "name": "Tool Calling API",
+    "description": "Postman collection generated from the Tool-Calling Go API routes. Set the baseUrl collection variable to the API host. The /assistant/chat endpoint requires GEMINI_API_KEY or GOOGLE_API_KEY to be configured on the server.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8003",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Assistant",
+      "item": [
+        {
+          "name": "Ask time question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What time is it in Asia/Kolkata?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assistant/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assistant",
+                "chat"
+              ]
+            },
+            "description": "Ask a natural-language time question. Requires the server's Gemini API key."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Time",
+      "item": [
+        {
+          "name": "Get current time",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/get-time",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-time"
+              ]
+            },
+            "description": "Fetch the current time for an IANA timezone."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "item": [
+        {
+          "name": "List tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tools/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tools",
+                ""
+              ]
+            },
+            "description": "Returns the tool definitions available to execute."
+          },
+          "response": []
+        },
+        {
+          "name": "Execute get_current_time",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"get_current_time\",\n  \"arguments\": {\n    \"timezone\": \"Asia/Kolkata\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tools/execute",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tools",
+                "execute"
+              ]
+            },
+            "description": "Executes the get_current_time tool. The arguments object must include an IANA timezone."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MCP",
+      "item": [
+        {
+          "name": "Initialize",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2025-03-26\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"Postman\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Initialize an MCP JSON-RPC connection."
+          },
+          "response": []
+        },
+        {
+          "name": "List MCP tools",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "2025-03-26"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\",\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Lists tools exposed through the MCP protocol."
+          },
+          "response": []
+        },
+        {
+          "name": "Call MCP get_current_time",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "2025-03-26"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_current_time\",\n    \"arguments\": {\n      \"timezone\": \"Asia/Kolkata\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Calls the get_current_time tool through MCP."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
