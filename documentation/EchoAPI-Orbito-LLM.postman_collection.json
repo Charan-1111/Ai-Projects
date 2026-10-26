@@ -1,0 +1,786 @@
+{
+  "info": {
+    "name": "EchoAPI - Orbito and LLM",
+    "description": "Exported from the local EchoAPI extension data. Saved auth values are not included; configure username, password, token, and apiKey variables as needed. Large document-upload examples are reduced to one sample document. Set docId to a valid document identifier for Fetch Document By Id.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Orbito",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Request-Id",
+                    "value": "123444",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/health",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Register User",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/auth/v1/register",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "v1",
+                    "register"
+                  ]
+                },
+                "auth": {
+                  "type": "basic",
+                  "basic": [
+                    {
+                      "key": "username",
+                      "value": "{{username}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{password}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "User Login",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/auth/v1/login",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "v1",
+                    "login"
+                  ]
+                },
+                "auth": {
+                  "type": "basic",
+                  "basic": [
+                    {
+                      "key": "username",
+                      "value": "{{username}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{password}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Validate Token",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/auth/v1/validate",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "v1",
+                    "validate"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Rotate Token",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/auth/v1/token/rotate",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "v1",
+                    "token",
+                    "rotate"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LLM",
+      "item": [
+        {
+          "name": "Semantic Search",
+          "item": [
+            {
+              "name": "Chunks",
+              "item": [
+                {
+                  "name": "Document Chunks",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "X-Session-Id",
+                        "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl8000}}/semantic/chunks/upload/document",
+                      "host": [
+                        "{{baseUrl8000}}"
+                      ],
+                      "path": [
+                        "semantic",
+                        "chunks",
+                        "upload",
+                        "document"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "[\n  {\n    \"docTitle\": \"Understanding Go Channels\",\n    \"docContent\": \"Channels allow goroutines to communicate with each other safely. A channel can send and receive values of a specific type. Channels are created using the make function and values are transmitted using the arrow operator.\",\n    \"docCategory\": \"golang\",\n    \"docSource\": \"personal-notes\",\n    \"metadata\": {\n      \"difficulty\": \"beginner\",\n      \"topic\": \"concurrency\"\n    }\n  }\n]",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Search Chunk Documents",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "X-Session-Id",
+                        "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl8000}}/semantic/chunks/search",
+                      "host": [
+                        "{{baseUrl8000}}"
+                      ],
+                      "path": [
+                        "semantic",
+                        "chunks",
+                        "search"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"query\": \"How does Go communicates between different go routines?\",\n  \"noOfDocs\": 5\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Fetch Document By Id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8001}}/semantic/document/fetch/byId",
+                  "host": [
+                    "{{baseUrl8001}}"
+                  ],
+                  "path": [
+                    "semantic",
+                    "document",
+                    "fetch",
+                    "byId"
+                  ],
+                  "query": [
+                    {
+                      "key": "docId",
+                      "value": "99a8998b-4b5f-423f-9f2c-b7f073cde020",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Multiple Document Upload Copy",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/semantic/document/inject/multiple",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "semantic",
+                    "document",
+                    "inject",
+                    "multiple"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"docTitle\": \"Introduction to Goroutines\",\n    \"docContent\": \"Goroutines are lightweight functions that run concurrently and are managed by the Go runtime. A goroutine is created by placing the go keyword before a function call.\",\n    \"docCategory\": \"golang\",\n    \"docSource\": \"personal-notes\",\n    \"metadata\": {\n      \"difficulty\": \"beginner\",\n      \"topic\": \"concurrency\"\n    }\n  }\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Inject Document",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/semantic/document/inject",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "semantic",
+                    "document",
+                    "inject"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"docTitle\": \"Introduction to Goroutines\",\n  \"docContent\": \"Goroutines are lightweight functions managed by the Go runtime.\",\n  \"docCategory\": \"golang\",\n  \"docSource\": \"personal-notes\",\n  \"metadata\": {\n    \"difficulty\": \"beginner\",\n    \"topic\": \"concurrency\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Search Documents",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/semantic/search",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "semantic",
+                    "search"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"How does Go executes tasks concurrently?\",\n  \"noOfDocs\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tools",
+              "item": []
+            },
+            {
+              "name": "List Tools",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8001}}/tools",
+                  "host": [
+                    "{{baseUrl8001}}"
+                  ],
+                  "path": [
+                    "tools"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "RAG",
+          "item": [
+            {
+              "name": "Chat",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8002}}/rag/ask/documents",
+                  "host": [
+                    "{{baseUrl8002}}"
+                  ],
+                  "path": [
+                    "rag",
+                    "ask",
+                    "documents"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prompt\": \"how go communicates between different goroutines\",\n  \"noOfDocs\": 5,\n  \"minimumScore\": 0.7,\n  \"filters\": {\n    \"category\": \"golang\",\n    \"difficulty\": \"beginner\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Tool Calling",
+          "item": [
+            {
+              "name": "Chat Copy",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8003}}/assistant/chat",
+                  "host": [
+                    "{{baseUrl8003}}"
+                  ],
+                  "path": [
+                    "assistant",
+                    "chat"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"What is the current time in London\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List Tools",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8003}}/tools",
+                  "host": [
+                    "{{baseUrl8003}}"
+                  ],
+                  "path": [
+                    "tools"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Execute Tool",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4f",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8003}}/tools/execute",
+                  "host": [
+                    "{{baseUrl8003}}"
+                  ],
+                  "path": [
+                    "tools",
+                    "execute"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"get_current_time\",\n  \"arguments\": {\n    \"timezone\": \"Asia/Kolkata\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Chat LLM",
+          "item": [
+            {
+              "name": "Generate Stream Response",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/v1/llm/generate/stream",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "llm",
+                    "generate",
+                    "stream"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prompt\": \"Explain about llm in simple words\",\n  \"model\": \"gemini-3.5-flash-lite\",\n  \"model_id\": \"fast-model\",\n  \"temperature\": 0.6,\n  \"max_output_tokens\": \"{{token}}\",\n  \"stream\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Response",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/v1/llm/generate",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "llm",
+                    "generate"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prompt\": \"Explain about llm in simple words\",\n  \"model\": \"gemini-3.5-flash-lite\",\n  \"model_id\": \"fast-model\",\n  \"temperature\": 0.6,\n  \"max_output_tokens\": \"{{token}}\",\n  \"stream\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Chat",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Session-Id",
+                    "value": "d1fbec14-e5c7-4cdf-a575-277effa5da4g",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl8000}}/v1/llm/chat",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "llm",
+                    "chat"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prompt\": \"what is the current time in india\",\n  \"model\": \"gemini-3.5-flash-lite\",\n  \"model_id\": \"fast-model\",\n  \"temperature\": 0.6,\n  \"max_output_tokens\": \"{{token}}\",\n  \"stream\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Available Models",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/v1/llm/models/available",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "llm",
+                    "models",
+                    "available"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Health",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl8000}}/health",
+                  "host": [
+                    "{{baseUrl8000}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl8000",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "baseUrl8001",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "baseUrl8002",
+      "value": "http://localhost:8002",
+      "type": "string"
+    },
+    {
+      "key": "baseUrl8003",
+      "value": "http://localhost:8003",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "docId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
