@@ -60,14 +60,18 @@ go mod download
 ```
 
 4. Create the required local configuration values for that project.
-5. Run the service from that project directory with its project-specific entrypoint.
+5. Run one or more services from the repository root by passing their folder names:
 
-Example pattern:
+```bash
+./run.sh LLM-Playground
+./run.sh Ask-My-Documents Semantic-Search
+```
+
+The root launcher starts requested services in the order given, waiting for each to listen before starting the next, and stops them when interrupted. To run a single service from its own directory, use its startup script:
 
 ```bash
 cd LLM-Playground
-go mod download
-go run ./cmd/llm
+./run.sh
 ```
 
 If a project has its own README, follow that file for environment variables and API usage; it is usually the most accurate source for local setup.
