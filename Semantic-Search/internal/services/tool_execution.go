@@ -12,6 +12,7 @@ import (
 func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest) (tools.ToolExecutionResponse, error) {
 	switch req.ToolName {
 	case "search_documents":
+		fmt.Println("Executing search_documents tool with arguments:", string(req.Arguments))
 		var args models.SearchRequest
 		if err := sonic.Unmarshal(req.Arguments, &args); err != nil {
 			return tools.ToolExecutionResponse{}, err
@@ -34,6 +35,7 @@ func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest
 
 		return tools.ToolExecutionResponse{Result: result}, nil
 	case "get_document":
+		fmt.Println("Executing get_document tool with arguments:", string(req.Arguments))
 		var args models.FetchDocument
 		if err := sonic.Unmarshal(req.Arguments, &args); err != nil {
 			return tools.ToolExecutionResponse{}, err
@@ -53,7 +55,6 @@ func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest
 		if err := sonic.Unmarshal(resultBytes, &result); err != nil {
 			return tools.ToolExecutionResponse{}, err
 		}
-
 		return tools.ToolExecutionResponse{Result: result}, nil
 	default:
 		return tools.ToolExecutionResponse{}, fmt.Errorf("unknown tool: %s", req.ToolName)
