@@ -103,23 +103,10 @@ func (app *Application) StartServer() error {
 
 	// fetch the details of the tools...
 	app.toolRegistry.RegisterTools()
-	registeredToolNames := make(map[string]struct{})
-	declarations := app.toolRegistry.GeminiDeclarations()
-	for _, declaration := range declarations {
-		registeredToolNames[declaration.Name] = struct{}{}
-	}
-	for modelID, modelConfig := range app.config.AvailableModels {
-		for _, requiredTool := range modelConfig.RequiredTools {
-			if _, exists := registeredToolNames[requiredTool]; !exists {
-				return fmt.Errorf("model %q requires tool %q, but it was not registered", modelID, requiredTool)
-			}
-		}
-	}
 	geminiProvider, ok := app.provider.(*provider.GeminiProvider)
 	if !ok {
 		return fmt.Errorf("configured provider does not support Gemini tool declarations")
 	}
-	geminiProvider.ConfigureTools(declarations, app.toolRegistry)
 
 	// registering mcp tools
 
@@ -139,7 +126,31 @@ func (app *Application) StartServer() error {
 	if mcpError != nil {
 		return mcpError
 	}
-	geminiProvider.ConfigureTools(app.mcpRegistry.GeminiDeclarations(), app.mcpRegistry)
+
+	toolRouter := tools.NewToolRouter()
+	if err := toolRouter.Register(app.toolRegistry.GeminiDeclarations(), app.toolRegistry); err != nil {
+		app.mcpRegistry.Close()
+		return err
+	}
+	if err := toolRouter.Register(app.mcpRegistry.GeminiDeclarations(), app.mcpRegistry); err != nil {
+		app.mcpRegistry.Close()
+		return err
+	}
+
+	declarations := toolRouter.GeminiDeclarations()
+	registeredToolNames := make(map[string]struct{}, len(declarations))
+	for _, declaration := range declarations {
+		registeredToolNames[declaration.Name] = struct{}{}
+	}
+	for modelID, modelConfig := range app.config.AvailableModels {
+		for _, requiredTool := range modelConfig.RequiredTools {
+			if _, exists := registeredToolNames[requiredTool]; !exists {
+				app.mcpRegistry.Close()
+				return fmt.Errorf("model %q requires tool %q, but it was not registered", modelID, requiredTool)
+			}
+		}
+	}
+	geminiProvider.ConfigureTools(declarations, toolRouter)
 
 	appServer := app.SetupRoutes()
 
