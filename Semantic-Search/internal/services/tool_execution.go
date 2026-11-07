@@ -18,7 +18,7 @@ func (s *Service) ExecuteTools(ctx context.Context, req tools.ExecuteToolRequest
 			return tools.ToolExecutionResponse{}, err
 		}
 
-		documentsResponse, err := s.SearchDocuments(ctx, args)
+		documentsResponse, err := s.SearchChunkedDocuments(ctx, args)
 		if err != nil {
 			return tools.ToolExecutionResponse{}, err
 		}

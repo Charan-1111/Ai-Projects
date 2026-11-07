@@ -5,11 +5,11 @@ import (
 	"semantic-search/internal/models"
 )
 
-const defaultSearchDocumentLimit = 10
+const defaultSearchResultLimit = 10
 
 func (s *Service) SearchDocuments(ctx context.Context, req models.SearchRequest) (models.SearchResponse, error) {
 	if req.NoofDocs <= 0 {
-		req.NoofDocs = defaultSearchDocumentLimit
+		req.NoofDocs = defaultSearchResultLimit
 	}
 
 	queryEmbed, err := s.llmProvider.EmbedText(ctx, req.Query)

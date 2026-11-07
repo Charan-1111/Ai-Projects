@@ -46,3 +46,26 @@ func TestGeminiFunctionCallsCollectsEveryCall(t *testing.T) {
 		t.Fatalf("unexpected function calls: %q, %q", calls[0].Name, calls[1].Name)
 	}
 }
+
+func TestGeminiRequiredToolsOnlyConstrainInitialRequest(t *testing.T) {
+	config := geminiGenerateConfig(
+		GenerateInput{RequiredTools: []string{"search_documents"}},
+		[]*genai.FunctionDeclaration{{Name: "search_documents"}, {Name: "get_document"}},
+	)
+	functionCallingConfig := config.ToolConfig.FunctionCallingConfig
+	if functionCallingConfig.Mode != genai.FunctionCallingConfigModeAny {
+		t.Fatalf("expected initial mode ANY, got %q", functionCallingConfig.Mode)
+	}
+	if len(functionCallingConfig.AllowedFunctionNames) != 1 || functionCallingConfig.AllowedFunctionNames[0] != "search_documents" {
+		t.Fatalf("expected only search_documents to be required initially, got %v", functionCallingConfig.AllowedFunctionNames)
+	}
+
+	config.ToolConfig = geminiAutomaticToolConfig()
+	functionCallingConfig = config.ToolConfig.FunctionCallingConfig
+	if functionCallingConfig.Mode != genai.FunctionCallingConfigModeAuto {
+		t.Fatalf("expected subsequent mode AUTO, got %q", functionCallingConfig.Mode)
+	}
+	if len(functionCallingConfig.AllowedFunctionNames) != 0 {
+		t.Fatalf("expected subsequent requests to allow every declared tool, got %v", functionCallingConfig.AllowedFunctionNames)
+	}
+}

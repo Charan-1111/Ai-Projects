@@ -116,6 +116,10 @@ func (g *GeminiProvider) Generate(ctx context.Context, input GenerateInput) (*Ge
 		}
 		contents = append(contents, &genai.Content{Role: "user", Parts: functionResponses})
 
+		if len(input.RequiredTools) > 0 {
+			config.ToolConfig = geminiAutomaticToolConfig()
+		}
+
 		response, err = g.client.Models.GenerateContent(ctx, input.Model, contents, config)
 		if err != nil {
 			classifiedErr := ClassifyError("gemini", fmt.Errorf("failed to generate response after tool execution: %w", err))
@@ -271,4 +275,12 @@ func geminiGenerateConfig(input GenerateInput, declarations []*genai.FunctionDec
 	}
 
 	return config
+}
+
+func geminiAutomaticToolConfig() *genai.ToolConfig {
+	return &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode: genai.FunctionCallingConfigModeAuto,
+		},
+	}
 }
