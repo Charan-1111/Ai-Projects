@@ -45,8 +45,10 @@ Force the required tool for the initial request, then switch to `AUTO` after suc
 2. Gemini calls `search_documents`.
 3. LLM-Playground executes the search.
 4. Search results are returned to Gemini.
-5. Function-calling mode switches to `AUTO`.
-6. Gemini can produce a final answer or request another tool if needed.
+5. Function-calling mode switches to `AUTO` and the required-tool name restriction is removed.
+6. Gemini can produce a final answer or request another declared tool, such as `get_document`.
+
+This transition is implemented in `internal/provider/gemini_provider.go`: the initial request uses `ANY` with the configured required tools, and requests after tool execution use `AUTO`.
 
 ### Multiple Required Tools
 
