@@ -6,6 +6,7 @@ import (
 	"llm-playground/internal/chat"
 	"llm-playground/internal/clients"
 	"llm-playground/internal/config"
+	"llm-playground/internal/dbqueries"
 	"llm-playground/internal/logging"
 	"llm-playground/internal/provider"
 	"llm-playground/internal/store/database"
@@ -41,8 +42,13 @@ func NewApplication() (*Application, error) {
 		return nil, err
 	}
 
+	queries, err := dbqueries.Load()
+	if err != nil {
+		return nil, fmt.Errorf("load database queries: %w", err)
+	}
+
 	databaseStore := &database.DataBaseStore{}
-	err = databaseStore.InitializeDatabaseStore(context.Background(), config.Queries, log)
+	err = databaseStore.InitializeDatabaseStore(context.Background(), queries, log)
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing database store : %w", err)
 	}
