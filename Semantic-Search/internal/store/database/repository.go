@@ -23,16 +23,23 @@ type Repository interface {
 }
 
 func (db *DataBaseStore) Create(ctx context.Context) error {
-	if _, err := db.Db.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector"); err != nil {
+	if _, err := db.Db.Exec(ctx, db.Queries.Create.VectorExtension); err != nil {
 		return fmt.Errorf("create vector extension: %w", err)
 	}
 
-	for tableName, createQuery := range db.Queries.Create {
-		_, err := db.Db.Exec(ctx, createQuery)
+	tables := []struct {
+		name  string
+		query string
+	}{
+		{name: "documents", query: db.Queries.Create.DocumentsTable},
+		{name: "chunks", query: db.Queries.Create.ChunksTable},
+	}
+	for _, table := range tables {
+		_, err := db.Db.Exec(ctx, table.query)
 		if err != nil {
-			return err
+			return fmt.Errorf("create %s table: %w", table.name, err)
 		} else {
-			db.Log.Log.Info().Msgf("Table %s created successfully", tableName)
+			db.Log.Log.Info().Msgf("Table %s created successfully", table.name)
 		}
 	}
 
@@ -40,7 +47,7 @@ func (db *DataBaseStore) Create(ctx context.Context) error {
 }
 
 func (db *DataBaseStore) SaveDocument(ctx context.Context, document models.Document, embedding []float32) error {
-	_, err := db.Db.Exec(ctx, db.Queries.Save.Embedding, document.DocId, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding))
+	_, err := db.Db.Exec(ctx, db.Queries.Save.Document, document.DocId, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding))
 	if err != nil {
 		return fmt.Errorf("Error saving embedding data : %w", err)
 	}
@@ -49,7 +56,7 @@ func (db *DataBaseStore) SaveDocument(ctx context.Context, document models.Docum
 }
 
 func (db *DataBaseStore) UpdateDocument(ctx context.Context, document models.Document, embedding []float32) (bool, error) {
-	result, err := db.Db.Exec(ctx, db.Queries.Edit.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
+	result, err := db.Db.Exec(ctx, db.Queries.Update.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
 	if err != nil {
 		return false, fmt.Errorf("error updating document: %w", err)
 	}
@@ -64,7 +71,7 @@ func (db *DataBaseStore) UpdateDocumentWithChunks(ctx context.Context, document 
 	}
 	defer dbTxn.Rollback(ctx)
 
-	result, err := dbTxn.Exec(ctx, db.Queries.Edit.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
+	result, err := dbTxn.Exec(ctx, db.Queries.Update.Document, document.DocTitle, document.DocContent, document.DocCategory, document.DocSource, document.MetaData, pgvector.NewVector(embedding), document.DocId)
 	if err != nil {
 		return false, fmt.Errorf("update document: %w", err)
 	}
@@ -77,13 +84,13 @@ func (db *DataBaseStore) UpdateDocumentWithChunks(ctx context.Context, document 
 	}
 
 	for _, documentChunk := range documentChunks {
-		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, documentChunk.Id, documentChunk.DocId, documentChunk.Content, documentChunk.Index, documentChunk.StartPosition, documentChunk.EndPosition, pgvector.NewVector(documentChunk.ChunkEmbed))
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunk, documentChunk.Id, documentChunk.DocId, documentChunk.Content, documentChunk.Index, documentChunk.StartPosition, documentChunk.EndPosition, pgvector.NewVector(documentChunk.ChunkEmbed))
 		if err != nil {
 			return false, fmt.Errorf("save updated chunk %d: %w", documentChunk.Index, err)
 		}
 	}
 
-	if _, err := dbTxn.Exec(ctx, db.Queries.Edit.IndexingStatus, document.DocId); err != nil {
+	if _, err := dbTxn.Exec(ctx, db.Queries.Update.IndexingStatus, document.DocId); err != nil {
 		return false, fmt.Errorf("update indexing status: %w", err)
 	}
 	if err := dbTxn.Commit(ctx); err != nil {
@@ -152,7 +159,7 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 
 	for _, chunk := range chunks {
 		// uploading to the database
-		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunks, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed))
+		_, err := dbTxn.Exec(ctx, db.Queries.Save.Chunk, chunk.Id, chunk.DocId, chunk.Content, chunk.Index, chunk.StartPosition, chunk.EndPosition, pgvector.NewVector(chunk.ChunkEmbed))
 		if err != nil {
 			return fmt.Errorf("save chunk %d: %w", chunk.Index, err)
 		}
@@ -160,7 +167,7 @@ func (db *DataBaseStore) UploadChunks(ctx context.Context, chunks []chunks.Chunk
 	}
 
 	// updating the indexing_status in documents table for the given document
-	_, err = dbTxn.Exec(ctx, db.Queries.Edit.IndexingStatus, docId)
+	_, err = dbTxn.Exec(ctx, db.Queries.Update.IndexingStatus, docId)
 	if err != nil {
 		return fmt.Errorf("update indexing status: %w", err)
 	}
@@ -198,7 +205,7 @@ func (db *DataBaseStore) SearchChunkedDocuments(ctx context.Context, embedding [
 }
 
 func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, embedding []float32, category string, difficulty string, limit int, minScore float32) ([]models.ChunkDetails, error) {
-	rows, err := db.Db.Query(ctx, db.Queries.Fetch.FilterChunkedDocuments, pgvector.NewVector(embedding), category, difficulty, limit, minScore)
+	rows, err := db.Db.Query(ctx, db.Queries.Fetch.FilteredChunkedDocuments, pgvector.NewVector(embedding), category, difficulty, limit, minScore)
 	if err != nil {
 		return []models.ChunkDetails{}, err
 	}
@@ -226,7 +233,7 @@ func (db *DataBaseStore) SearchFilteredChunkedDocuments(ctx context.Context, emb
 func (db *DataBaseStore) FetchDocument(ctx context.Context, docId string) (models.Document, error) {
 	var document models.Document
 
-	err := db.Db.QueryRow(ctx, db.Queries.Fetch.FetchDocumentsById, docId).Scan(
+	err := db.Db.QueryRow(ctx, db.Queries.Fetch.DocumentByID, docId).Scan(
 		&document.DocId,
 		&document.DocTitle,
 		&document.DocContent,
