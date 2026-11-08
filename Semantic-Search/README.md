@@ -63,7 +63,6 @@ The JSON configuration currently controls:
 | `chunk_details.chunk_overlap` | `50` | Overlapping words between chunks |
 | `embedding_models` | Gemini embedding names | Descriptive model configuration |
 | `retries` | See config file | Reserved retry configuration |
-| `queries` | SQL in config | Table creation and repository queries |
 
 The active provider currently uses `gemini-embedding-001` and output
 dimensionality `1536` directly in code. The configured model and retry values
@@ -104,8 +103,8 @@ with `ON DELETE CASCADE`.
 | `embedding` | `VECTOR(1536)` | Required |
 | `created_at` | `TIMESTAMPTZ` | Database timestamp |
 
-The schema and SQL statements live in `config/local/config.json`; there is no
-separate migration system yet.
+The schema and SQL statements live in `internal/dbqueries/sql` and are embedded
+into the application; there is no separate migration system yet.
 
 ## Run locally
 

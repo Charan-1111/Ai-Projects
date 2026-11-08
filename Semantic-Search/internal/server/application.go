@@ -6,6 +6,7 @@ import (
 
 	"semantic-search/internal/chunks"
 	"semantic-search/internal/config"
+	"semantic-search/internal/dbqueries"
 	"semantic-search/internal/logging"
 	"semantic-search/internal/providers"
 	"semantic-search/internal/services"
@@ -30,8 +31,13 @@ func NewApplication() (*Application, error) {
 		return nil, fmt.Errorf("load configuration: %w", err)
 	}
 
+	queries, err := dbqueries.Load()
+	if err != nil {
+		return nil, fmt.Errorf("load database queries: %w", err)
+	}
+
 	databaseStore := &database.DataBaseStore{}
-	if err := databaseStore.InitializeDatabaseStore(context.Background(), applicationConfig.Queries, log); err != nil {
+	if err := databaseStore.InitializeDatabaseStore(context.Background(), queries, log); err != nil {
 		return nil, fmt.Errorf("initialize database store: %w", err)
 	}
 

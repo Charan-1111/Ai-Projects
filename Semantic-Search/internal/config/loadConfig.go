@@ -15,7 +15,6 @@ type Configuration struct {
 	EmbeddingModels models.Embeddings             `json:"embedding_models"`
 	ChunkDetails    models.Chunk                  `json:"chunk_details"`
 	Retries         models.Retries                `json:"retries"`
-	Queries         models.Queries                `json:"queries"`
 	once            sync.Once
 }
 

@@ -6,28 +6,28 @@ import (
 	"os"
 	"sync"
 
+	"semantic-search/internal/dbqueries"
 	"semantic-search/internal/logging"
-	"semantic-search/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DataBaseStore struct {
 	Db      *pgxpool.Pool
-	Queries models.Queries
 	Log     *logging.Log
+	Queries dbqueries.Queries
 	once    sync.Once
 }
 
-func (db *DataBaseStore) InitializeDatabaseStore(ctx context.Context, queries models.Queries, log *logging.Log) error {
+func (db *DataBaseStore) InitializeDatabaseStore(ctx context.Context, queries dbqueries.Queries, log *logging.Log) error {
 	username := os.Getenv("DB_USERNAME")
 	password := os.Getenv("DB_PASSWORD")
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
-	db.Queries = queries
 	db.Log = log
+	db.Queries = queries
 
 	var err error
 
